@@ -1077,10 +1077,12 @@ export default function App() {
     id: string;
     text: string;
   } | null>(null);
-  const [seenEmailIds, setSeenEmailIds] = useState<number[]>([
-    EMAIL_DATABASE[0].id,
-  ]);
 
+  // NEW: Force the app to ALWAYS find a Tier 1 email on startup
+  const initialEmail =
+    EMAIL_DATABASE.find((e) => e.tier === 1) || EMAIL_DATABASE[0];
+
+  const [seenEmailIds, setSeenEmailIds] = useState<number[]>([initialEmail.id]);
   const RANK_THRESHOLDS = {
     IRON: 0,
     COPPER: 400,
@@ -1338,7 +1340,7 @@ export default function App() {
   const getDifficultyTier = (currentRank: string) => {};
 
   const currentTier = getDifficultyTier(rank);
-  const [activeEmail, setActiveEmail] = useState(EMAIL_DATABASE[0]);
+  const [activeEmail, setActiveEmail] = useState(initialEmail);
 
   const liveAccuracy =
     totalDecisions > 0
@@ -1445,33 +1447,50 @@ export default function App() {
 
   const handleNext = () => {
     setFeedback(null);
-    setFoundIoCs([]);
+    setFoundIoCs([]); // Reset flags
     setHoveredIoC(null);
     setInspectorActive(false);
 
-    const unlockedEmails = EMAIL_DATABASE.filter(
-      (email) => email.tier === currentTier
+    // 1. STRICT RANK REQUIREMENT (RR): Only grab emails for the current tier
+    // Using '==' protects against string/number mismatches in the DB
+    const rankSpecificEmails = EMAIL_DATABASE.filter(
+      (email) => email.tier == currentTier
     );
 
-    let availableEmails = unlockedEmails.filter(
+    // 2. Filter out emails the user has already seen
+    let unseenEmails = rankSpecificEmails.filter(
       (email) => !seenEmailIds.includes(email.id)
     );
 
-    if (availableEmails.length === 0) {
-      availableEmails = unlockedEmails.filter(
+    // 3. If we've seen everything in this rank, reset the pool
+    if (unseenEmails.length === 0) {
+      // Try to exclude the current email so it doesn't repeat back-to-back
+      unseenEmails = rankSpecificEmails.filter(
         (email) => email.id !== activeEmail.id
       );
+
+      // If there is only 1 email in the entire tier, just use it
+      if (unseenEmails.length === 0) {
+        unseenEmails = rankSpecificEmails;
+      }
+
+      // Reset the memory pool, remembering only the one we just finished
       setSeenEmailIds([activeEmail.id]);
     }
 
-    // --- SAFETY CHECK START ---
-    // If the tier is empty, use the whole database as a fallback
-    const finalPool =
-      availableEmails.length > 0 ? availableEmails : EMAIL_DATABASE;
-    const randomIndex = Math.floor(Math.random() * finalPool.length);
-    const nextEmail = finalPool[randomIndex];
-    // --- SAFETY CHECK END ---
+    // 4. ULTIMATE FAIL-SAFE: If the rank database is empty, pull from global
+    // This prevents the "trapped on one email" bug you reported!
+    if (unseenEmails.length === 0) {
+      unseenEmails = EMAIL_DATABASE.filter(
+        (email) => email.id !== activeEmail.id
+      );
+    }
 
+    // 5. Pick randomly from the generated pool
+    const randomIndex = Math.floor(Math.random() * unseenEmails.length);
+    const nextEmail = unseenEmails[randomIndex];
+
+    // 6. Update State
     if (nextEmail) {
       setActiveEmail(nextEmail);
       setSeenEmailIds((prev) => [...prev, nextEmail.id]);
@@ -1533,16 +1552,40 @@ export default function App() {
     <div className="app-container">
       {/* 1. LEFT SIDEBAR */}
       <aside className="sidebar">
-        <div className="logo-area">
-          <Zap size={28} fill="currentColor" />
+        <div
+          className="logo-area"
+          style={{
+            display: "flex",
+            flexDirection: "column", // Stack vertically to prevent horizontal overflow
+            alignItems: "flex-start",
+            gap: "8px",
+            marginBottom: "2.5rem",
+          }}
+        >
+          {/* Official White Netskope SVG */}
+          <img
+            src="https://go.netskope.com/rs/665-KFP-612/images/Netskope-Primary-Logo-Reversed-Color-RGB.svg"
+            alt="Netskope Logo"
+            style={{ height: "20px", width: "auto" }} // Slightly smaller height for better fit
+          />
           <span
             style={{
               fontWeight: 900,
-              fontSize: "1.5rem",
-              letterSpacing: "-1px",
+              fontSize: "1.25rem", // Reduced font size slightly to fit the container
+              letterSpacing: "-0.5px",
+              display: "flex",
+              marginTop: "4px",
             }}
           >
-            SKOPEPHISH
+            <span style={{ color: "#ffffff" }}>SKOPE</span>
+            <span
+              style={{
+                color: "#00a9e0",
+                textShadow: "0 0 12px rgba(0, 169, 224, 0.5)",
+              }}
+            >
+              PHISH
+            </span>
           </span>
         </div>
 
@@ -1658,7 +1701,7 @@ export default function App() {
                   className="inbox-item-status"
                   style={{
                     color: isActive
-                      ? "#eab308"
+                      ? "#00a9e0"
                       : isLocked
                       ? "#64748b"
                       : "#94a3b8",
@@ -1701,24 +1744,24 @@ export default function App() {
                   gap: "5px",
                   fontWeight: 900,
                   color:
-                    currentTier <= 2
+                    activeEmail.tier <= 2
                       ? "#10b981"
-                      : currentTier <= 4
+                      : activeEmail.tier <= 4
                       ? "#f59e0b"
                       : "#ef4444",
                 }}
               >
                 <ShieldAlert size={16} />
-                THREAT LEVEL:{" "}
-                {currentTier === 1
+                Difficulty:{" "}
+                {activeEmail.tier === 1
                   ? "BEGINNER"
-                  : currentTier === 2
+                  : activeEmail.tier === 2
                   ? "EASY"
-                  : currentTier === 3
+                  : activeEmail.tier === 3
                   ? "MEDIUM"
-                  : currentTier === 4
+                  : activeEmail.tier === 4
                   ? "ADVANCED"
-                  : currentTier === 5
+                  : activeEmail.tier === 5
                   ? "PRO"
                   : "IMPOSSIBLE"}
               </div>
