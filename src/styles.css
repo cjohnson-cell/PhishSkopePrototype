@@ -10,26 +10,27 @@ html {
 .app-container {
   display: flex;
   height: 100vh;
-  background: #0f172a;
+  background: #000c24; /* Netskope Deep Background */
   overflow: hidden;
 }
 
-/* --- Sidebar --- */
 .sidebar {
   width: 300px;
-  background: #1e293b;
-  border-right: 1px solid #334155;
+  background: #001a47;
+  border-right: 1px solid rgba(0, 169, 224, 0.2);
   padding: 2rem;
   display: flex;
   flex-direction: column;
   z-index: 50;
+  box-shadow: 5px 0 25px rgba(0, 0, 0, 0.4);
+  overflow-x: hidden; /* Prevent horizontal scroll/bleed */
+  box-sizing: border-box; /* Ensure padding doesn't add to width */
 }
-
 .logo-area {
   display: flex;
   align-items: center;
   gap: 10px;
-  color: #eab308;
+  color: #00a9e0; /* Netskope Cyan */
   margin-bottom: 2rem;
 }
 
@@ -67,8 +68,8 @@ html {
 
 .xp-bar-fill {
   height: 100%;
-  background: #eab308;
-  box-shadow: 0 0 15px #eab308;
+  background: #00a9e0; /* Netskope Cyan */
+  box-shadow: 0 0 15px rgba(0, 169, 224, 0.6);
   transition: width 0.5s ease-out;
 }
 
@@ -76,14 +77,14 @@ html {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: linear-gradient(90deg, #f59e0b, #d97706);
-  color: #000;
+  background: linear-gradient(90deg, #ff7b00, #e66e00); /* Netskope Orange */
+  color: #fff;
   padding: 6px 12px;
   border-radius: 8px;
   font-weight: 900;
   font-size: 11px;
   margin-top: 15px;
-  box-shadow: 0 0 20px rgba(245, 158, 11, 0.4);
+  box-shadow: 0 0 20px rgba(255, 123, 0, 0.3);
 }
 
 /* --- Buttons & Toggles --- */
@@ -105,10 +106,10 @@ html {
   color: #94a3b8;
 }
 .toggle-on {
-  background: #eab308;
-  color: #000;
+  background: #00a9e0; /* Netskope Cyan */
+  color: #fff;
   transform: scale(1.05);
-  box-shadow: 0 0 20px rgba(234, 179, 8, 0.4);
+  box-shadow: 0 0 20px rgba(0, 169, 224, 0.4);
 }
 
 .sidebar-btn-secondary {
@@ -163,20 +164,21 @@ html {
   transition: 0.2s;
 }
 .btn-safe {
-  background: #fff;
-  border-color: #cbd5e1;
-  color: #475569;
+  background: #00a9e0; /* Netskope Cyan */
+  border-color: #0088b3;
+  color: #fff;
 }
 .btn-safe:hover {
-  background: #f1f5f9;
+  background: #0088b3;
+  color: #fff;
 }
 .btn-phish {
-  background: #fee2e2;
-  color: #dc2626;
-  border-color: #fecaca;
+  background: #ff7b00; /* Netskope Orange */
+  color: #fff;
+  border-color: #e66e00;
 }
 .btn-phish:hover {
-  background: #dc2626;
+  background: #e66e00;
   color: #fff;
 }
 
@@ -201,7 +203,7 @@ html {
 }
 .inbox-item.active {
   background: #f1f5f9;
-  border-left: 4px solid #eab308;
+  border-left: 4px solid #00a9e0; /* Netskope Cyan */
 }
 .inbox-item.locked {
   opacity: 0.5;
@@ -253,13 +255,13 @@ html {
 
 .magnifier {
   pointer-events: none;
-  position: fixed; /* CHANGED from absolute */
-  top: 0; /* NEW */
-  left: 0; /* NEW */
+  position: fixed;
+  top: 0;
+  left: 0;
   z-index: 9999 !important;
   width: 240px;
   height: 240px;
-  border: 4px solid #eab308;
+  border: 4px solid #00a9e0; /* Netskope Cyan */
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(12px) brightness(1.1);
@@ -267,7 +269,7 @@ html {
   align-items: center;
   justify-content: center;
   text-align: center;
-  box-shadow: 0 0 60px rgba(0, 0, 0, 0.6), inset 0 0 30px rgba(234, 179, 8, 0.2);
+  box-shadow: 0 0 60px rgba(0, 0, 0, 0.6), inset 0 0 30px rgba(0, 169, 224, 0.2);
 }
 
 /* --- Feedback Overlays --- */
@@ -331,13 +333,13 @@ html {
   margin-bottom: 2rem;
 }
 .leaderboard-title {
-  color: #eab308;
+  color: #00a9e0; /* Netskope Cyan */
   font-size: 2rem;
   font-weight: 900;
   font-style: italic;
   letter-spacing: 3px;
   margin: 0;
-  text-shadow: 0 0 15px rgba(234, 179, 8, 0.4);
+  text-shadow: 0 0 15px rgba(0, 169, 224, 0.4);
   text-transform: uppercase;
 }
 .leaderboard-subtitle {
@@ -436,8 +438,8 @@ html {
   transition: 0.3s;
 }
 .username-input:focus {
-  border-color: #eab308;
-  box-shadow: 0 0 10px rgba(234, 179, 8, 0.2);
+  border-color: #00a9e0;
+  box-shadow: 0 0 10px rgba(0, 169, 224, 0.3);
 }
 
 .leaderboard-item.is-me {
