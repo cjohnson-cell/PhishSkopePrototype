@@ -1406,6 +1406,21 @@ const MAGNIFIER_SKINS: Record<string, any> = {
     borderWidth: "12px",
     isAnimated: true,
   },
+  // --- NEW MYTHICAL SKIN (1%) ---
+  VOID_WALKER: {
+    id: "VOID_WALKER",
+    name: "Void Walker",
+    rarity: "Mythical",
+    color: "#f43f5e",
+    filter: "blur(20px) contrast(3) saturate(0) invert(1)",
+    shadow: "rgba(244, 63, 94, 1)",
+    handleBackground: "radial-gradient(circle, #000000, #4c0519)",
+    handleWidth: "12px",
+    borderWidth: "2px",
+    lensSize: 300,
+    handleGlow: "0 0 50px #f43f5e",
+    isAnimated: true,
+  },
 };
 const getRarityColor = (rarity: string) => {
   switch (rarity) {
@@ -1417,6 +1432,8 @@ const getRarityColor = (rarity: string) => {
       return "#a855f7"; // Purple
     case "Legendary":
       return "#eab308"; // Gold
+    case "Mythical":
+      return "#f43f5e"; // Crimson/Rose
     default:
       return "#fff";
   }
@@ -1786,7 +1803,7 @@ export default function App() {
     }
 
     // 2. 500 XP MILESTONE CHECK
-    const currentThreshold = Math.floor(xp / 50);
+    const currentThreshold = Math.floor(xp / 1000);
     if (currentThreshold > lastXpThreshold) {
       const cratesEarned = currentThreshold - lastXpThreshold;
       setCrates((prev) => prev + cratesEarned);
@@ -1811,6 +1828,8 @@ export default function App() {
         return 500;
       case "Legendary":
         return 1500;
+      case "Mythical":
+        return 5000;
       default:
         return 50;
     }
@@ -1827,9 +1846,10 @@ export default function App() {
     const getRandomSkin = () => {
       const roll = Math.random() * 100;
       let rarity = "Common";
-      if (roll > 70 && roll <= 90) rarity = "Rare";
-      if (roll > 90 && roll <= 99) rarity = "Epic";
-      if (roll > 99) rarity = "Legendary";
+      if (roll > 50 && roll <= 79) rarity = "Rare";
+      if (roll > 79 && roll <= 94) rarity = "Epic";
+      if (roll > 94 && roll <= 99) rarity = "Legendary";
+      if (roll > 99) rarity = "Mythical";
 
       // Exclude "STANDARD" from being rolled in crates
       const availableSkins = Object.values(MAGNIFIER_SKINS).filter(
@@ -1935,7 +1955,7 @@ export default function App() {
 
     if (isCorrect) {
       setCorrectDecisions((prev) => prev + 1);
-      const xpGained = 400 * multiplier;
+      const xpGained = 100 * multiplier;
       setXp((prev) => prev + xpGained);
       setStreak((prev) => prev + 1);
       setFeedback({
@@ -3213,6 +3233,7 @@ export default function App() {
                       Rare: 2,
                       Epic: 3,
                       Legendary: 4,
+                      Mythical: 5,
                     };
                     return rarityOrder[a.rarity] - rarityOrder[b.rarity];
                   })
@@ -3470,23 +3491,49 @@ export default function App() {
                         </h1>
                       </>
                     )}
-                    <button
-                      onClick={() => {
-                        setShowUnboxing(false);
-                        setShowInventory(true);
-                      }}
+                    <div
                       style={{
+                        display: "flex",
+                        gap: "15px",
+                        justifyContent: "center",
                         marginTop: "20px",
-                        background: "transparent",
-                        color: "#fff",
-                        border: "1px solid #fff",
-                        padding: "8px 16px",
-                        borderRadius: "4px",
-                        cursor: "pointer",
                       }}
                     >
-                      Continue
-                    </button>
+                      {crates > 0 && (
+                        <button
+                          onClick={openCrate}
+                          style={{
+                            background:
+                              "linear-gradient(90deg, #ff7b00, #e66e00)",
+                            color: "#fff",
+                            border: "1px solid #ffba7a",
+                            padding: "8px 16px",
+                            borderRadius: "4px",
+                            cursor: "pointer",
+                            fontWeight: "bold",
+                            boxShadow: "0 0 10px rgba(255, 123, 0, 0.4)",
+                          }}
+                        >
+                          Decrypt Another ({crates})
+                        </button>
+                      )}
+                      <button
+                        onClick={() => {
+                          setShowUnboxing(false);
+                          setShowInventory(true);
+                        }}
+                        style={{
+                          background: "transparent",
+                          color: "#fff",
+                          border: "1px solid #fff",
+                          padding: "8px 16px",
+                          borderRadius: "4px",
+                          cursor: "pointer",
+                        }}
+                      >
+                        {crates > 0 ? "Close" : "Continue"}
+                      </button>
+                    </div>
                   </motion.div>
                 ) : (
                   <div style={{ color: "#64748b", fontWeight: 800 }}>
