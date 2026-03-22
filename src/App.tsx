@@ -1803,7 +1803,7 @@ export default function App() {
     }
 
     // 2. 500 XP MILESTONE CHECK
-    const currentThreshold = Math.floor(xp / 1000);
+    const currentThreshold = Math.floor(xp / 500);
     if (currentThreshold > lastXpThreshold) {
       const cratesEarned = currentThreshold - lastXpThreshold;
       setCrates((prev) => prev + cratesEarned);
@@ -1980,10 +1980,9 @@ export default function App() {
     setHoveredIoC(null);
     setInspectorActive(false);
 
-    // 1. STRICT RANK REQUIREMENT (RR): Only grab emails for the current tier
-    // Using '==' protects against string/number mismatches in the DB
+    // 1. CUMULATIVE RANK REQUIREMENT: Mix in all unlocked difficulty tiers
     const rankSpecificEmails = EMAIL_DATABASE.filter(
-      (email) => email.tier == currentTier
+      (email) => email.tier <= currentTier
     );
 
     // 2. Filter out emails the user has already seen
@@ -2063,6 +2062,12 @@ export default function App() {
       if (id && !foundIoCs.includes(id)) {
         setFoundIoCs((prev) => [...prev, id]);
 
+        // NEW: If this is the last piece of evidence, turn off the inspector automatically
+        if (foundIoCs.length + 1 === activeEmail.iocs.length) {
+          setInspectorActive(false);
+          setHoveredIoC(null); // Clears the tooltip so it doesn't get stuck
+        }
+
         // Direct DOM Manipulation to visually highlight the found item permanently
         // Swapped to Neutral Amber so we don't spoil if it's safe or a threat!
         iocElement.style.backgroundColor = "#fef9c3";
@@ -2129,23 +2134,125 @@ export default function App() {
           />
 
           <div className="rank-label">Current Rank</div>
-          <h2 className="rank-title">{rank}</h2>
+          <h2
+            className="rank-title"
+            style={{
+              color: getRankColor(rank),
+              textShadow:
+                rank === "APEX"
+                  ? `0 0 15px ${getRankColor(rank)}, 0 0 5px #fff`
+                  : `0 0 15px ${getRankColor(rank)}80`,
+            }}
+          >
+            {rank}
+          </h2>
 
-          <div className="xp-bar-container">
-            <motion.div
-              className="xp-bar-fill"
-              animate={{ width: `${getProgressPercentage()}%` }}
-            />
-          </div>
+          {/* DYNAMIC XP COUNTER & FIRE BAR */}
+          {(() => {
+            let nextRank = "MAX RANK";
+            let nextTarget = xp;
+            if (xp < RANK_THRESHOLDS.COPPER) {
+              nextRank = "COPPER";
+              nextTarget = RANK_THRESHOLDS.COPPER;
+            } else if (xp < RANK_THRESHOLDS.GOLD) {
+              nextRank = "GOLD";
+              nextTarget = RANK_THRESHOLDS.GOLD;
+            } else if (xp < RANK_THRESHOLDS.TITANIUM) {
+              nextRank = "TITANIUM";
+              nextTarget = RANK_THRESHOLDS.TITANIUM;
+            } else if (xp < RANK_THRESHOLDS.RUBY) {
+              nextRank = "RUBY";
+              nextTarget = RANK_THRESHOLDS.RUBY;
+            } else if (xp < RANK_THRESHOLDS.APEX) {
+              nextRank = "APEX";
+              nextTarget = RANK_THRESHOLDS.APEX;
+            }
+
+            const isMax = nextRank === "MAX RANK";
+
+            return (
+              <>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "flex-end",
+                    marginTop: "15px",
+                    marginBottom: "8px",
+                  }}
+                >
+                  <div
+                    style={{
+                      color: "#94a3b8",
+                      fontSize: "12px",
+                      fontWeight: 900,
+                      letterSpacing: "1px",
+                    }}
+                  >
+                    {xp.toLocaleString()} XP
+                  </div>
+                  {!isMax && (
+                    <div
+                      style={{
+                        color: getRankColor(nextRank),
+                        fontSize: "10px",
+                        fontWeight: 800,
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      {(nextTarget - xp).toLocaleString()} XP TO {nextRank}
+                    </div>
+                  )}
+                </div>
+
+                <div className="xp-bar-container" style={{ marginTop: 0 }}>
+                  <motion.div
+                    className="xp-bar-fill"
+                    animate={{
+                      width: `${getProgressPercentage()}%`,
+                      // The Fire Animation overrides the standard blue background
+                      background:
+                        streak >= 3
+                          ? [
+                              "linear-gradient(90deg, #ff7b00, #f59e0b)",
+                              "linear-gradient(90deg, #dc2626, #ff7b00)",
+                              "linear-gradient(90deg, #ff7b00, #f59e0b)",
+                            ]
+                          : "linear-gradient(90deg, #00a9e0, #00a9e0)",
+                      boxShadow:
+                        streak >= 3
+                          ? [
+                              "0 0 15px rgba(255, 123, 0, 0.6)",
+                              "0 0 25px rgba(239, 68, 68, 0.9)",
+                              "0 0 15px rgba(255, 123, 0, 0.6)",
+                            ]
+                          : "0 0 15px rgba(0, 169, 224, 0.6)",
+                    }}
+                    transition={{
+                      width: { duration: 0.5, ease: "easeOut" },
+                      background:
+                        streak >= 3
+                          ? { duration: 1.5, repeat: Infinity, ease: "linear" }
+                          : { duration: 0.3 },
+                      boxShadow:
+                        streak >= 3
+                          ? { duration: 1.5, repeat: Infinity, ease: "linear" }
+                          : { duration: 0.3 },
+                    }}
+                  />
+                </div>
+              </>
+            );
+          })()}
 
           {streak >= 3 && (
             <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
               className="streak-badge"
             >
               <Flame size={14} fill="currentColor" />
-              <span>{multiplier}X MULTIPLIER</span>
+              <span>{multiplier}X MULTIPLIER ACTIVE</span>
             </motion.div>
           )}
           <div
@@ -2156,22 +2263,9 @@ export default function App() {
               fontWeight: 800,
             }}
           >
-            STREAK: {streak} | TOTAL: {xp} XP
+            CURRENT STREAK: {streak}
           </div>
         </div>
-
-        <button
-          onClick={() => {
-            setInspectorActive(!inspectorActive);
-            if (inspectorActive) setHoveredIoC(null);
-          }}
-          className={`inspector-toggle ${
-            inspectorActive ? "toggle-on" : "toggle-off"
-          }`}
-        >
-          <Search size={20} />{" "}
-          {inspectorActive ? "INSPECTOR ON" : "ENABLE INSPECTOR"}
-        </button>
 
         <button
           onClick={() => setShowLeaderboard(true)}
@@ -2208,17 +2302,37 @@ export default function App() {
             color: "#94a3b8",
           }}
         >
-          🎒 FORENSIC ARMORY
+          Inventory
         </button>
       </aside>
 
       {/* 2 & 3. MAIN VIEW (INBOX + READING PANE) */}
 
-      {/* FORCE CURSOR HIDING ON ALL ELEMENTS (INCLUDING LINKS) WHEN INSPECTOR IS ON */}
+      {/* FORCE CURSOR HIDING & INVISIBLE HITBOX EXPANSION WHEN INSPECTOR IS ON */}
       {inspectorActive && (
         <style>{`
           .content-wrapper, .content-wrapper * {
             cursor: none !important;
+          }
+
+          /* UX TRICK: Inflate the clickable area of the evidence by 8 pixels 
+             in every direction using an invisible pseudo-element. 
+             This prevents frustrating "near misses" without altering the visual layout
+             or making the hitbox so large it guides the user blindly.
+          */
+          [data-ioc-id] {
+            position: relative;
+          }
+          
+          [data-ioc-id]::after {
+            content: '';
+            position: absolute;
+            top: -8px;
+            bottom: -8px;
+            left: -8px;
+            right: -8px;
+            z-index: 5;
+            cursor: none;
           }
         `}</style>
       )}
@@ -2365,7 +2479,40 @@ export default function App() {
                 </span>
               </div>
             </div>
-            <div style={{ display: "flex", gap: "12px" }}>
+            <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+              {/* NEW LOCATION: Inspector Tool right above the email */}
+              <button
+                onClick={() => {
+                  setInspectorActive(!inspectorActive);
+                  if (inspectorActive) setHoveredIoC(null);
+                }}
+                className={`inspector-toggle ${
+                  inspectorActive ? "toggle-on" : "toggle-off"
+                }`}
+                style={{
+                  padding: "0.6rem 1.5rem", // Tweaked to match the Safe/Phish buttons
+                  borderRadius: "99px", // Pill-shape
+                  fontSize: "0.875rem",
+                  boxShadow: inspectorActive
+                    ? "0 0 20px rgba(0, 169, 224, 0.4)"
+                    : "none",
+                }}
+              >
+                <Search size={16} />{" "}
+                {inspectorActive ? "INSPECTOR ON" : "ENABLE INSPECTOR"}
+              </button>
+
+              {/* Subtle divider to separate tools from final decisions */}
+              <div
+                style={{
+                  width: "2px",
+                  height: "24px",
+                  background: "#e2e8f0",
+                  margin: "0 4px",
+                  borderRadius: "2px",
+                }}
+              />
+
               <button
                 className="btn-base btn-safe"
                 onClick={() => handleDecision("SAFE")}
@@ -2574,45 +2721,90 @@ export default function App() {
                 backdropFilter: skin.filter,
               }}
             >
-              {/* THE DYNAMIC HANDLE */}
-              <motion.div
+              {/* MATHEMATICALLY PERFECT HANDLE ALIGNMENT */}
+              <div
                 style={{
                   position: "absolute",
-                  top: "82%",
-                  left: "82%",
-                  width: skin.handleWidth || "26px",
-                  height: skin.handleHeight || "130px",
-                  borderRadius: skin.handleRadius || "13px",
-                  transformOrigin: "top center",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "100%",
                   transform: "rotate(-45deg)",
-                  border: `3px solid ${isFinding ? "#ff7b00" : skin.color}`,
-                  zIndex: -1,
+                  zIndex: -1, // Keeps the whole assembly behind the lens border
                 }}
-                animate={{
-                  background:
-                    skin.isAnimated && !isFinding
-                      ? ["#ffffff", "#0df0d4", "#ff00ff", "#ffffff"]
-                      : isFinding
-                      ? "#9a3412"
-                      : skin.handleBackground || skin.handleColor,
-                  boxShadow:
-                    skin.isAnimated && !isFinding
-                      ? [
-                          "0 0 30px #ffffff",
-                          "0 0 30px #0df0d4",
-                          "0 0 30px #ff00ff",
-                          "0 0 30px #ffffff",
-                        ]
-                      : isFinding
-                      ? "0 0 20px #ff7b00"
-                      : skin.handleGlow,
-                }}
-                transition={
-                  skin.isAnimated && !isFinding
-                    ? { duration: 2, repeat: Infinity }
-                    : { type: "tween", duration: 0 }
-                }
-              />
+              >
+                <motion.div
+                  style={{
+                    position: "absolute",
+                    // Shift UP by 2px to deeply embed the flat top into the thick border,
+                    // ensuring absolutely zero pixel gaps from anti-aliasing.
+                    top: "calc(100% - 2px)",
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    width: skin.handleWidth || "26px",
+                    height: skin.handleHeight || "130px",
+                    borderBottomLeftRadius: skin.handleRadius || "13px",
+                    borderBottomRightRadius: skin.handleRadius || "13px",
+                    // Forcing a flat top cut to flush-mount against the circular curve
+                    borderTopLeftRadius: 0,
+                    borderTopRightRadius: 0,
+                    borderTop: "none",
+                    borderLeft: `3px solid ${
+                      isFinding ? "#ff7b00" : skin.color
+                    }`,
+                    borderRight: `3px solid ${
+                      isFinding ? "#ff7b00" : skin.color
+                    }`,
+                    borderBottom: `3px solid ${
+                      isFinding ? "#ff7b00" : skin.color
+                    }`,
+                  }}
+                  animate={{
+                    background:
+                      skin.isAnimated && !isFinding
+                        ? ["#ffffff", "#0df0d4", "#ff00ff", "#ffffff"]
+                        : isFinding
+                        ? "#9a3412"
+                        : skin.handleBackground || skin.handleColor,
+                    boxShadow:
+                      skin.isAnimated && !isFinding
+                        ? [
+                            "0 0 30px #ffffff",
+                            "0 0 30px #0df0d4",
+                            "0 0 30px #ff00ff",
+                            "0 0 30px #ffffff",
+                          ]
+                        : isFinding
+                        ? "0 0 20px #ff7b00"
+                        : skin.handleGlow,
+                    borderLeftColor: isFinding ? "#ff7b00" : skin.color,
+                    borderRightColor: isFinding ? "#ff7b00" : skin.color,
+                    borderBottomColor: isFinding ? "#ff7b00" : skin.color,
+                  }}
+                  transition={{
+                    background:
+                      skin.isAnimated && !isFinding
+                        ? { duration: 2, repeat: Infinity }
+                        : { type: "tween", duration: 0 },
+                    boxShadow:
+                      skin.isAnimated && !isFinding
+                        ? { duration: 2, repeat: Infinity }
+                        : { type: "tween", duration: 0 },
+                    borderLeftColor:
+                      skin.isAnimated && !isFinding
+                        ? { duration: 2, repeat: Infinity }
+                        : { type: "tween", duration: 0 },
+                    borderRightColor:
+                      skin.isAnimated && !isFinding
+                        ? { duration: 2, repeat: Infinity }
+                        : { type: "tween", duration: 0 },
+                    borderBottomColor:
+                      skin.isAnimated && !isFinding
+                        ? { duration: 2, repeat: Infinity }
+                        : { type: "tween", duration: 0 },
+                  }}
+                />
+              </div>
 
               {/* LENS CONTENT */}
               <div
