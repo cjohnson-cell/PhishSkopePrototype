@@ -14,6 +14,9 @@ import {
   MailOpen,
   Fingerprint,
   HelpCircle,
+  Medal,
+  ShoppingCart,
+  Coins,
 } from "lucide-react";
 import DOMPurify from "dompurify";
 import "./styles.css";
@@ -1597,12 +1600,265 @@ const getRarityColor = (rarity: string) => {
   }
 };
 
-const BASE_LEADERBOARD = [
-  { id: "npc1", name: "SecOps_Ninja", xp: 4000, acc: "98%" },
-  { id: "npc2", name: "Alex_IT", xp: 2500, acc: "95%" },
-  { id: "npc3", name: "Sarah.Dev", xp: 1600, acc: "97%" },
-  { id: "npc4", name: "Michael.HR", xp: 1000, acc: "75%" },
-  { id: "npc5", name: "Dwight.S", xp: 600, acc: "40%" },
+// ==========================================
+// 50-PLAYER MOCK LEADERBOARD GENERATOR
+// (To be replaced with Postgres API fetch)
+// ==========================================
+const generateMockLeaderboard = () => {
+  const prefixes = [
+    "SecOps",
+    "Cyber",
+    "Net",
+    "Cloud",
+    "Zero",
+    "Phish",
+    "Byte",
+    "Threat",
+    "Patch",
+    "Iron",
+    "Ur",
+    "Hacker",
+    "Gamer",
+    "Mr",
+  ];
+  const suffixes = [
+    "_Ninja",
+    "_Knight",
+    ".Dev",
+    ".HR",
+    "_Admin",
+    "_Guru",
+    "_Hunter",
+    "Slayer",
+    "_Logic",
+    "Watcher",
+    "Mom",
+    "Dad",
+    "Cooked",
+    "Bro",
+    "Worm",
+  ];
+
+  const board = [];
+  // Generate 49 highly competitive NPCs
+  for (let i = 0; i < 199; i++) {
+    const randomPrefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+    const randomSuffix = suffixes[Math.floor(Math.random() * suffixes.length)];
+    const rankXp = Math.floor(Math.random() * 11500) + 500; // Mix of Iron through Apex
+    const accuracy = Math.floor(Math.random() * 25 + 75); // 75% to 100%
+
+    board.push({
+      id: `npc_${i}`,
+      name: `${randomPrefix}${randomSuffix}_${i}`,
+      xp: rankXp,
+      acc: `${accuracy}%`,
+    });
+  }
+  return board.sort((a, b) => b.xp - a.xp);
+};
+
+const BASE_LEADERBOARD = generateMockLeaderboard();
+
+// ==========================================
+// SHOP PRICING & ACHIEVEMENTS DATABASE
+// ==========================================
+const getSkinPrice = (rarity: string) => {
+  switch (rarity) {
+    case "Common":
+      return 250;
+    case "Rare":
+      return 750;
+    case "Epic":
+      return 2500;
+    case "Legendary":
+      return 7500;
+    case "Mythical":
+      return 25000;
+    default:
+      return 99999;
+  }
+};
+
+const ACHIEVEMENTS_DB = [
+  // Consistency (Total Solves)
+  {
+    id: "ach_tot_1",
+    title: "Novice Analyst",
+    desc: "Complete 1 investigation.",
+    reward: 25,
+    type: "total",
+    target: 1,
+  },
+  {
+    id: "ach_tot_2",
+    title: "Getting the Hang of It",
+    desc: "Complete 5 investigations.",
+    reward: 75,
+    type: "total",
+    target: 5,
+  },
+  {
+    id: "ach_tot_3",
+    title: "The Investigator",
+    desc: "Complete 10 investigations.",
+    reward: 150,
+    type: "total",
+    target: 10,
+  },
+  {
+    id: "ach_tot_4",
+    title: "Lead Detective",
+    desc: "Complete 25 investigations.",
+    reward: 400,
+    type: "total",
+    target: 25,
+  },
+  {
+    id: "ach_tot_5",
+    title: "Chief of Security",
+    desc: "Complete 50 investigations.",
+    reward: 1000,
+    type: "total",
+    target: 50,
+  },
+
+  // Streaks (General)
+  {
+    id: "ach_str_1",
+    title: "Warming Up",
+    desc: "Reach an accuracy streak of 3.",
+    reward: 50,
+    type: "streak",
+    target: 3,
+  },
+  {
+    id: "ach_str_2",
+    title: "Hot Streak",
+    desc: "Reach an accuracy streak of 10.",
+    reward: 200,
+    type: "streak",
+    target: 10,
+  },
+  {
+    id: "ach_str_3",
+    title: "Unbreakable",
+    desc: "Reach an accuracy streak of 20.",
+    reward: 500,
+    type: "streak",
+    target: 20,
+  },
+  {
+    id: "ach_str_4",
+    title: "Flawless Execution",
+    desc: "Reach an accuracy streak of 50.",
+    reward: 2500,
+    type: "streak",
+    target: 50,
+  },
+
+  // Safe Streaks
+  {
+    id: "ach_saf_1",
+    title: "Trust Anchor I",
+    desc: "Correctly identify 3 SAFE emails in a row.",
+    reward: 75,
+    type: "safe_streak",
+    target: 3,
+  },
+  {
+    id: "ach_saf_2",
+    title: "Trust Anchor II",
+    desc: "Correctly identify 10 SAFE emails in a row.",
+    reward: 300,
+    type: "safe_streak",
+    target: 10,
+  },
+  {
+    id: "ach_saf_3",
+    title: "Trust Anchor III",
+    desc: "Correctly identify 20 SAFE emails in a row.",
+    reward: 1000,
+    type: "safe_streak",
+    target: 20,
+  },
+
+  // Phish Streaks
+  {
+    id: "ach_phi_1",
+    title: "Threat Hunter I",
+    desc: "Correctly identify 3 PHISH emails in a row.",
+    reward: 75,
+    type: "phish_streak",
+    target: 3,
+  },
+  {
+    id: "ach_phi_2",
+    title: "Threat Hunter II",
+    desc: "Correctly identify 10 PHISH emails in a row.",
+    reward: 300,
+    type: "phish_streak",
+    target: 10,
+  },
+  {
+    id: "ach_phi_3",
+    title: "Threat Hunter III",
+    desc: "Correctly identify 20 PHISH emails in a row.",
+    reward: 1000,
+    type: "phish_streak",
+    target: 20,
+  },
+
+  // Rank Ascensions
+  {
+    id: "ach_rnk_cop",
+    title: "Ascension: Copper",
+    desc: "Reach COPPER Rank (1,000 XP).",
+    reward: 500,
+    type: "rank",
+    target: 1000,
+  },
+  {
+    id: "ach_rnk_gld",
+    title: "Ascension: Gold",
+    desc: "Reach GOLD Rank (2,500 XP).",
+    reward: 1000,
+    type: "rank",
+    target: 2500,
+  },
+  {
+    id: "ach_rnk_tit",
+    title: "Ascension: Titanium",
+    desc: "Reach TITANIUM Rank (4,500 XP).",
+    reward: 2000,
+    type: "rank",
+    target: 4500,
+  },
+  {
+    id: "ach_rnk_rub",
+    title: "Ascension: Ruby",
+    desc: "Reach RUBY Rank (7,000 XP).",
+    reward: 3500,
+    type: "rank",
+    target: 7000,
+  },
+  {
+    id: "ach_rnk_apx",
+    title: "The Apex Predator",
+    desc: "Reach APEX Rank (10,000 XP).",
+    reward: 5000,
+    type: "rank",
+    target: 10000,
+  },
+  // Classified Easter Egg
+  {
+    id: "ach_sec_benevac",
+    title: "The Benevac Protocol",
+    desc: "Acknowledge the Architect: Maintain 98% accuracy across 100 investigations.",
+    reward: 20000,
+    type: "secret",
+    target: 100,
+    isSecret: true,
+  },
 ];
 
 export default function App() {
@@ -1635,6 +1891,17 @@ export default function App() {
   const [wonSkin, setWonSkin] = useState<any>(null);
   const [lastXpThreshold, setLastXpThreshold] = useState(0);
   const [spinKey, setSpinKey] = useState(0); // Forces roulette animation to reset
+
+  // --- ECONOMY & ACHIEVEMENTS STATE ---
+  const [skopeCoins, setSkopeCoins] = useState(0);
+  const [showAchievements, setShowAchievements] = useState(false);
+  const [unlockedAchievements, setUnlockedAchievements] = useState<string[]>(
+    []
+  );
+  const [safeStreakCount, setSafeStreakCount] = useState(0);
+  const [phishStreakCount, setPhishStreakCount] = useState(0);
+  const [shopTab, setShopTab] = useState<"INVENTORY" | "SHOP">("INVENTORY");
+  const [achievementToasts, setAchievementToasts] = useState<any[]>([]);
   const [isDuplicate, setIsDuplicate] = useState(false);
   const [duplicateXpReward, setDuplicateXpReward] = useState(0);
 
@@ -1944,7 +2211,7 @@ export default function App() {
         rankColor: getRankColor(tierRank),
       };
     })
-    .slice(0, 6);
+    .slice(0, 200);
 
   useEffect(() => {
     // 1. RANK UP CHECK
@@ -2093,11 +2360,6 @@ export default function App() {
   const handleDecision = (choice: string) => {
     if (feedback) return;
 
-    // ==========================================
-    // THE UNIVERSAL ENFORCER
-    // Users must find all indicators (threats OR trust indicators)
-    // before they are allowed to submit a decision.
-    // ==========================================
     if (foundIoCs.length < activeEmail.iocs.length) {
       setFeedback({
         type: "warning",
@@ -2106,23 +2368,88 @@ export default function App() {
       return;
     }
 
-    // Scoring
-    setTotalDecisions((prev) => prev + 1);
     const isCorrect =
       (choice === "PHISH" && activeEmail.isPhish) ||
       (choice === "SAFE" && !activeEmail.isPhish);
 
+    // --- SYNCHRONOUS TRACKING FOR SECRET ACHIEVEMENTS ---
+    const newTotalDecisions = totalDecisions + 1;
+    setTotalDecisions(newTotalDecisions);
+
     if (isCorrect) {
-      setCorrectDecisions((prev) => prev + 1);
+      const newCorrect = correctDecisions + 1;
+      setCorrectDecisions(newCorrect);
+
+      // Calculate live accuracy right now for the Benevac Protocol
+      const currentAccuracy = (newCorrect / newTotalDecisions) * 100;
+
       const xpGained = 100 * multiplier;
-      setXp((prev) => prev + xpGained);
-      setStreak((prev) => prev + 1);
+      const newXp = xp + xpGained;
+      setXp(newXp);
+
+      const newStreak = streak + 1;
+      setStreak(newStreak);
+
+      const newSafeStreak = choice === "SAFE" ? safeStreakCount + 1 : 0;
+      const newPhishStreak = choice === "PHISH" ? phishStreakCount + 1 : 0;
+      setSafeStreakCount(newSafeStreak);
+      setPhishStreakCount(newPhishStreak);
+
+      // --- ACHIEVEMENT CHECKER ---
+      let coinsEarnedThisRound = 0;
+      let unlockedThisRound: string[] = [];
+
+      ACHIEVEMENTS_DB.forEach((ach) => {
+        if (!unlockedAchievements.includes(ach.id)) {
+          let achieved = false;
+          if (ach.type === "total" && newCorrect >= ach.target) achieved = true;
+          if (ach.type === "streak" && newStreak >= ach.target) achieved = true;
+          if (ach.type === "safe_streak" && newSafeStreak >= ach.target)
+            achieved = true;
+          if (ach.type === "phish_streak" && newPhishStreak >= ach.target)
+            achieved = true;
+          if (ach.type === "rank" && newXp >= ach.target) achieved = true;
+
+          // SECRET: The Benevac Protocol
+          if (ach.type === "secret" && ach.id === "ach_sec_benevac") {
+            if (newTotalDecisions >= 100 && currentAccuracy >= 98)
+              achieved = true;
+          }
+
+          if (achieved) {
+            unlockedThisRound.push(ach.id);
+            coinsEarnedThisRound += ach.reward;
+          }
+        }
+      });
+
+      if (unlockedThisRound.length > 0) {
+        setUnlockedAchievements((prev) => [...prev, ...unlockedThisRound]);
+        setSkopeCoins((prev) => prev + coinsEarnedThisRound);
+
+        // --- NEW: Trigger the Achievement Animation Toast ---
+        const unlockedObjs = ACHIEVEMENTS_DB.filter((ach) =>
+          unlockedThisRound.includes(ach.id)
+        );
+        setAchievementToasts(unlockedObjs);
+
+        // Auto-dismiss the animation after 2.5 seconds
+        setTimeout(() => setAchievementToasts([]), 2500);
+      }
+
+      const achievementText =
+        unlockedThisRound.length > 0
+          ? ` 🏆 +${coinsEarnedThisRound} Coins from Achievements!`
+          : "";
+
       setFeedback({
         type: "success",
-        text: `Correct! ${activeEmail.lesson} (+${xpGained} XP)`,
+        text: `Correct! ${activeEmail.lesson} (+${xpGained} XP)${achievementText}`,
       });
     } else {
       setStreak(0);
+      setSafeStreakCount(0);
+      setPhishStreakCount(0);
       setFeedback({
         type: "error",
         text:
@@ -2423,9 +2750,21 @@ export default function App() {
               color: "#64748b",
               marginTop: "10px",
               fontWeight: 800,
+              display: "flex",
+              justifyContent: "space-between",
             }}
           >
-            CURRENT STREAK: {streak}
+            <span>CURRENT STREAK: {streak}</span>
+            <span
+              style={{
+                color: "#fbbf24",
+                display: "flex",
+                alignItems: "center",
+                gap: "4px",
+              }}
+            >
+              <Coins size={12} /> {skopeCoins.toLocaleString()} COINS
+            </span>
           </div>
         </div>
 
@@ -2457,23 +2796,40 @@ export default function App() {
             </button>
           )}
 
-          {/* 2. INVENTORY BUTTON (Netskope Cyan Theme) */}
+          {/* 2. ACHIEVEMENTS BUTTON (Gold Theme) */}
           <button
-            onClick={() => setShowInventory(true)}
+            onClick={() => setShowAchievements(true)}
             className="sidebar-btn-secondary"
             style={{
               margin: 0,
-              background: "rgba(0, 169, 224, 0.1)", // Light cyan tint
-              borderColor: "#00a9e0", // Netskope Cyan
-              color: "#00a9e0",
-              boxShadow: "0 0 10px rgba(0, 169, 224, 0.15)",
-              textShadow: "0 0 8px rgba(0, 169, 224, 0.4)",
+              background: "rgba(251, 191, 36, 0.1)",
+              borderColor: "#fbbf24",
+              color: "#fbbf24",
+              boxShadow: "0 0 10px rgba(251, 191, 36, 0.15)",
             }}
           >
-            <ShieldAlert size={16} /> INVENTORY
+            <Medal size={16} /> ACHIEVEMENTS
           </button>
 
-          {/* 3. GLOBAL LEADERBOARD BUTTON (Netskope Dark Slate Theme) */}
+          {/* 3. ARMORY & SHOP BUTTON (Cyan Theme) */}
+          <button
+            onClick={() => {
+              setShowInventory(true);
+              setShopTab("INVENTORY");
+            }}
+            className="sidebar-btn-secondary"
+            style={{
+              margin: 0,
+              background: "rgba(0, 169, 224, 0.1)",
+              borderColor: "#00a9e0",
+              color: "#00a9e0",
+              boxShadow: "0 0 10px rgba(0, 169, 224, 0.15)",
+            }}
+          >
+            <ShoppingCart size={16} /> ARMORY & SHOP
+          </button>
+
+          {/* 4. GLOBAL LEADERBOARD BUTTON (Netskope Dark Slate Theme) */}
           <button
             onClick={() => setShowLeaderboard(true)}
             className="sidebar-btn-secondary"
@@ -3501,7 +3857,16 @@ export default function App() {
               <div className="leaderboard-header">
                 <h2 className="leaderboard-title">Apex Protocol</h2>
               </div>
-              <div className="leaderboard-list">
+
+              {/* --- UPDATED: Added scrollable container styles --- */}
+              <div
+                className="leaderboard-list"
+                style={{
+                  maxHeight: "55vh",
+                  overflowY: "auto",
+                  paddingRight: "10px", // Prevents the scrollbar from overlapping content
+                }}
+              >
                 {dynamicLeaderboard.map((user) => (
                   <motion.div
                     key={user.id}
@@ -3589,6 +3954,7 @@ export default function App() {
             <div
               className="leaderboard-modal"
               onClick={(e) => e.stopPropagation()}
+              style={{ maxWidth: "700px" }}
             >
               <button
                 className="close-btn"
@@ -3596,12 +3962,77 @@ export default function App() {
               >
                 <X size={24} />
               </button>
-              <h2
-                className="leaderboard-title"
-                style={{ textAlign: "center", marginBottom: "20px" }}
+
+              <div
+                style={{
+                  display: "flex",
+                  gap: "20px",
+                  marginBottom: "20px",
+                  borderBottom: "1px solid #334155",
+                  paddingBottom: "10px",
+                }}
               >
-                INVENTORY
-              </h2>
+                <button
+                  onClick={() => setShopTab("INVENTORY")}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    color: shopTab === "INVENTORY" ? "#00a9e0" : "#64748b",
+                    fontWeight: 900,
+                    fontSize: "1.2rem",
+                    cursor: "pointer",
+                  }}
+                >
+                  MY INVENTORY
+                </button>
+                <button
+                  onClick={() => setShopTab("SHOP")}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    color: shopTab === "SHOP" ? "#fbbf24" : "#64748b",
+                    fontWeight: 900,
+                    fontSize: "1.2rem",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "5px",
+                  }}
+                >
+                  <ShoppingCart size={18} /> COIN SHOP
+                </button>
+                <div
+                  style={{
+                    marginLeft: "auto",
+                    color: "#fbbf24",
+                    fontWeight: 900,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "5px",
+                  }}
+                >
+                  <Coins size={18} /> {skopeCoins.toLocaleString()}
+                </div>
+              </div>
+
+              {shopTab === "SHOP" && (
+                <div
+                  style={{
+                    background: "rgba(220, 38, 38, 0.1)",
+                    border: "1px solid #dc2626",
+                    color: "#fca5a5",
+                    padding: "10px",
+                    borderRadius: "8px",
+                    fontSize: "12px",
+                    marginBottom: "20px",
+                    textAlign: "center",
+                    fontWeight: "bold",
+                  }}
+                >
+                  NOTICE: Direct purchase is expensive. We highly advise
+                  inspectors to rely on CRATE openings for loadout upgrades.
+                </div>
+              )}
 
               <div
                 style={{
@@ -3614,20 +4045,16 @@ export default function App() {
                 }}
               >
                 {Object.values(MAGNIFIER_SKINS)
-                  .sort((a, b) => {
-                    // Sorting logic: Common -> Rare -> Epic -> Legendary
-                    const rarityOrder: Record<string, number> = {
-                      Common: 1,
-                      Rare: 2,
-                      Epic: 3,
-                      Legendary: 4,
-                      Mythical: 5,
-                    };
-                    return rarityOrder[a.rarity] - rarityOrder[b.rarity];
-                  })
+                  .sort(
+                    (a, b) => getSkinPrice(a.rarity) - getSkinPrice(b.rarity)
+                  )
                   .map((skin) => {
                     const isOwned = inventory.includes(skin.id);
                     const isEquipped = equippedSkin === skin.id;
+                    const price = getSkinPrice(skin.rarity);
+
+                    if (shopTab === "INVENTORY" && !isOwned) return null;
+                    if (shopTab === "SHOP" && isOwned) return null;
 
                     return (
                       <div
@@ -3639,7 +4066,6 @@ export default function App() {
                             isOwned ? skin.color : "#334155"
                           }`,
                           borderRadius: "8px",
-                          opacity: isOwned ? 1 : 0.5,
                         }}
                       >
                         <div
@@ -3661,7 +4087,8 @@ export default function App() {
                         >
                           {skin.name}
                         </div>
-                        {isOwned ? (
+
+                        {shopTab === "INVENTORY" ? (
                           <button
                             onClick={() => setEquippedSkin(skin.id)}
                             style={{
@@ -3681,23 +4108,159 @@ export default function App() {
                             {isEquipped ? "EQUIPPED" : "EQUIP"}
                           </button>
                         ) : (
-                          <div
+                          <button
+                            onClick={() => {
+                              if (skopeCoins >= price) {
+                                setSkopeCoins((prev) => prev - price);
+                                setInventory((prev) => [...prev, skin.id]);
+                              }
+                            }}
+                            disabled={skopeCoins < price}
                             style={{
                               width: "100%",
                               padding: "8px",
                               marginTop: "10px",
-                              textAlign: "center",
-                              color: "#64748b",
-                              fontSize: "12px",
+                              background:
+                                skopeCoins >= price ? "#10b981" : "#334155",
+                              color: skopeCoins >= price ? "#000" : "#94a3b8",
+                              border: "none",
+                              borderRadius: "4px",
+                              cursor:
+                                skopeCoins >= price ? "pointer" : "not-allowed",
                               fontWeight: "bold",
+                              display: "flex",
+                              justifyContent: "center",
+                              alignItems: "center",
+                              gap: "5px",
                             }}
                           >
-                            LOCKED
-                          </div>
+                            <Coins size={14} /> {price.toLocaleString()}
+                          </button>
                         )}
                       </div>
                     );
                   })}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showAchievements && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="leaderboard-overlay"
+            onClick={() => setShowAchievements(false)}
+          >
+            <div
+              className="leaderboard-modal"
+              onClick={(e) => e.stopPropagation()}
+              style={{ maxWidth: "600px" }}
+            >
+              <button
+                className="close-btn"
+                onClick={() => setShowAchievements(false)}
+              >
+                <X size={24} />
+              </button>
+              <h2
+                className="leaderboard-title"
+                style={{ textAlign: "center", marginBottom: "20px" }}
+              >
+                Achievements
+              </h2>
+
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "10px",
+                  maxHeight: "50vh",
+                  overflowY: "auto",
+                  paddingRight: "10px",
+                }}
+              >
+                {ACHIEVEMENTS_DB.map((ach) => {
+                  const isUnlocked = unlockedAchievements.includes(ach.id);
+
+                  // NEW: Obfuscate secrets if they aren't unlocked yet
+                  const isHiddenSecret = ach.isSecret && !isUnlocked;
+                  const displayTitle = isHiddenSecret ? "???" : ach.title;
+                  const displayDesc = isHiddenSecret
+                    ? "Classified Objective. Requirements unknown."
+                    : ach.desc;
+
+                  return (
+                    <div
+                      key={ach.id}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        padding: "15px",
+                        background: isUnlocked
+                          ? "rgba(16, 185, 129, 0.1)"
+                          : "#0f172a",
+                        border: `1px solid ${
+                          isUnlocked ? "#10b981" : "#334155"
+                        }`,
+                        borderRadius: "8px",
+                      }}
+                    >
+                      <div>
+                        <div
+                          style={{
+                            color: isUnlocked
+                              ? "#10b981"
+                              : isHiddenSecret
+                              ? "#ef4444"
+                              : "#fff",
+                            fontWeight: 800,
+                            fontSize: "14px",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "8px",
+                          }}
+                        >
+                          {isUnlocked ? (
+                            <CheckCircle size={16} />
+                          ) : (
+                            <Lock
+                              size={16}
+                              color={isHiddenSecret ? "#ef4444" : "#64748b"}
+                            />
+                          )}
+                          {displayTitle}
+                        </div>
+                        <div
+                          style={{
+                            color: isHiddenSecret ? "#fca5a5" : "#94a3b8",
+                            fontSize: "12px",
+                            marginTop: "4px",
+                          }}
+                        >
+                          {displayDesc}
+                        </div>
+                      </div>
+                      <div
+                        style={{
+                          color: "#fbbf24",
+                          fontWeight: 900,
+                          fontSize: "14px",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "5px",
+                          opacity: isUnlocked ? 0.5 : 1,
+                        }}
+                      >
+                        <Coins size={14} /> {ach.reward.toLocaleString()}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </motion.div>
@@ -3947,7 +4510,12 @@ export default function App() {
             <motion.div
               className="leaderboard-modal"
               onClick={(e) => e.stopPropagation()}
-              style={{ maxWidth: "600px" }}
+              style={{
+                maxWidth: "600px",
+                maxHeight: "90vh",
+                display: "flex",
+                flexDirection: "column",
+              }}
             >
               <button
                 className="close-btn"
@@ -3969,26 +4537,30 @@ export default function App() {
                 style={{
                   textAlign: "center",
                   color: "#94a3b8",
-                  marginBottom: "30px",
+                  marginBottom: "20px",
                   fontSize: "14px",
                   fontWeight: 700,
                 }}
               >
-                Follow these protocols to investigate threats and rank up.
+                Follow these protocols to investigate threats and build your
+                armory.
               </p>
 
               <div
                 style={{
                   display: "flex",
                   flexDirection: "column",
-                  gap: "15px",
+                  gap: "12px",
+                  overflowY: "auto",
+                  paddingRight: "10px",
+                  paddingBottom: "10px",
                 }}
               >
                 {/* Step 1 */}
                 <div
                   style={{
                     background: "#0f172a",
-                    padding: "20px",
+                    padding: "15px",
                     borderRadius: "8px",
                     borderLeft: "4px solid #00a9e0",
                   }}
@@ -3996,11 +4568,11 @@ export default function App() {
                   <h3
                     style={{
                       color: "#fff",
-                      margin: "0 0 10px 0",
+                      margin: "0 0 8px 0",
                       display: "flex",
                       alignItems: "center",
                       gap: "10px",
-                      fontSize: "16px",
+                      fontSize: "15px",
                     }}
                   >
                     <Search size={18} color="#00a9e0" /> 1. Enable the Inspector
@@ -4023,7 +4595,7 @@ export default function App() {
                 <div
                   style={{
                     background: "#0f172a",
-                    padding: "20px",
+                    padding: "15px",
                     borderRadius: "8px",
                     borderLeft: "4px solid #f59e0b",
                   }}
@@ -4031,11 +4603,11 @@ export default function App() {
                   <h3
                     style={{
                       color: "#fff",
-                      margin: "0 0 10px 0",
+                      margin: "0 0 8px 0",
                       display: "flex",
                       alignItems: "center",
                       gap: "10px",
-                      fontSize: "16px",
+                      fontSize: "15px",
                     }}
                   >
                     <Fingerprint size={18} color="#f59e0b" /> 2. Log the
@@ -4052,7 +4624,8 @@ export default function App() {
                     When the magnifier detects a threat or a trust indicator,{" "}
                     <strong>click on it</strong> to log it into your Evidence
                     Tracker. You must find ALL evidence before making a
-                    decision.
+                    decision.{" "}
+                    <em>Take your time—precision is rewarded over speed.</em>
                   </p>
                 </div>
 
@@ -4060,7 +4633,7 @@ export default function App() {
                 <div
                   style={{
                     background: "#0f172a",
-                    padding: "20px",
+                    padding: "15px",
                     borderRadius: "8px",
                     borderLeft: "4px solid #10b981",
                   }}
@@ -4068,11 +4641,11 @@ export default function App() {
                   <h3
                     style={{
                       color: "#fff",
-                      margin: "0 0 10px 0",
+                      margin: "0 0 8px 0",
                       display: "flex",
                       alignItems: "center",
                       gap: "10px",
-                      fontSize: "16px",
+                      fontSize: "15px",
                     }}
                   >
                     <ShieldAlert size={18} color="#10b981" /> 3. Make the Call
@@ -4085,7 +4658,7 @@ export default function App() {
                       lineHeight: "1.5",
                     }}
                   >
-                    Once the evidence is collected, decide if the email is a{" "}
+                    Once evidence is collected, decide if the email is a{" "}
                     <strong>Threat (Phish)</strong> or a <strong>Safe</strong>{" "}
                     workflow. Correct decisions build your streak and XP.
                   </p>
@@ -4095,7 +4668,7 @@ export default function App() {
                 <div
                   style={{
                     background: "#0f172a",
-                    padding: "20px",
+                    padding: "15px",
                     borderRadius: "8px",
                     borderLeft: "4px solid #a855f7",
                   }}
@@ -4103,14 +4676,14 @@ export default function App() {
                   <h3
                     style={{
                       color: "#fff",
-                      margin: "0 0 10px 0",
+                      margin: "0 0 8px 0",
                       display: "flex",
                       alignItems: "center",
                       gap: "10px",
-                      fontSize: "16px",
+                      fontSize: "15px",
                     }}
                   >
-                    <Trophy size={18} color="#a855f7" /> 4. Ascend the Ranks
+                    <Medal size={18} color="#a855f7" /> 4. Earn Service Medals
                   </h3>
                   <p
                     style={{
@@ -4120,9 +4693,49 @@ export default function App() {
                       lineHeight: "1.5",
                     }}
                   >
-                    Earn XP to unlock harder simulation tiers. Every time you
-                    rank up, or hit XP milestones, you earn{" "}
-                    <strong>Crates</strong> containing rare magnifier skins!
+                    Ascend through the ranks (Iron to Apex) by earning XP.
+                    Maintaining high accuracy streaks and ranking up unlocks{" "}
+                    <strong>Achievements</strong>, rewarding you with{" "}
+                    <strong>SkopeCoins</strong>.
+                  </p>
+                </div>
+
+                {/* Step 5 */}
+                <div
+                  style={{
+                    background: "#0f172a",
+                    padding: "15px",
+                    borderRadius: "8px",
+                    borderLeft: "4px solid #fbbf24",
+                  }}
+                >
+                  <h3
+                    style={{
+                      color: "#fff",
+                      margin: "0 0 8px 0",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "10px",
+                      fontSize: "15px",
+                    }}
+                  >
+                    <ShoppingCart size={18} color="#fbbf24" /> 5. Requisition
+                    Gear
+                  </h3>
+                  <p
+                    style={{
+                      color: "#cbd5e1",
+                      margin: 0,
+                      fontSize: "13px",
+                      lineHeight: "1.5",
+                    }}
+                  >
+                    Use your SkopeCoins in the <strong>Coin Shop</strong> to
+                    purchase exclusive Magnifier Skins.{" "}
+                    <em>
+                      Tip: Earning XP to unlock free Decrypt Crates is the most
+                      efficient way to build your armory!
+                    </em>
                   </p>
                 </div>
               </div>
@@ -4132,7 +4745,7 @@ export default function App() {
                 style={{
                   width: "100%",
                   padding: "15px",
-                  marginTop: "30px",
+                  marginTop: "20px",
                   background: "#00a9e0",
                   color: "#fff",
                   border: "none",
@@ -4142,6 +4755,7 @@ export default function App() {
                   cursor: "pointer",
                   textTransform: "uppercase",
                   boxShadow: "0 0 15px rgba(0, 169, 224, 0.4)",
+                  flexShrink: 0,
                 }}
               >
                 Acknowledge & Begin
@@ -4151,6 +4765,89 @@ export default function App() {
         )}
       </AnimatePresence>
 
+      {/* --- ACHIEVEMENT UNLOCK TOAST ANIMATION --- */}
+      <AnimatePresence>
+        {achievementToasts.length > 0 && (
+          <motion.div
+            style={{
+              position: "fixed",
+              top: "30px",
+              left: "50%",
+              x: "-50%", // Framer Motion's shorthand for transform: translateX(-50%)
+              zIndex: 9999,
+              display: "flex",
+              flexDirection: "column",
+              gap: "10px",
+              pointerEvents: "none", // Ensures it doesn't block the user from clicking the Next button
+            }}
+          >
+            {achievementToasts.map((ach, i) => (
+              <motion.div
+                key={ach.id}
+                initial={{ y: -50, scale: 0.8, opacity: 0 }}
+                animate={{ y: 0, scale: 1, opacity: 1 }}
+                exit={{ y: -50, scale: 0.8, opacity: 0 }}
+                transition={{ type: "spring", bounce: 0.5, delay: i * 0.2 }} // Staggers the animation if multiple unlock at once
+                style={{
+                  background: "linear-gradient(90deg, #0f172a, #1e293b)",
+                  border: "2px solid #fbbf24",
+                  padding: "15px 25px",
+                  borderRadius: "12px",
+                  boxShadow: "0 10px 25px rgba(251, 191, 36, 0.3)",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "15px",
+                  color: "#fff",
+                }}
+              >
+                <div
+                  style={{
+                    background: "#fbbf24",
+                    color: "#0f172a",
+                    borderRadius: "50%",
+                    padding: "10px",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    boxShadow: "0 0 15px rgba(251, 191, 36, 0.5)",
+                  }}
+                >
+                  <Medal size={24} />
+                </div>
+                <div>
+                  <div
+                    style={{
+                      fontSize: "12px",
+                      color: "#fbbf24",
+                      fontWeight: 900,
+                      textTransform: "uppercase",
+                      letterSpacing: "1px",
+                    }}
+                  >
+                    Achievement Unlocked!
+                  </div>
+                  <div style={{ fontSize: "16px", fontWeight: 900 }}>
+                    {ach.title}
+                  </div>
+                </div>
+                <div
+                  style={{
+                    marginLeft: "15px",
+                    color: "#10b981",
+                    fontWeight: 900,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "5px",
+                    fontSize: "16px",
+                  }}
+                >
+                  <Coins size={18} /> +{ach.reward}
+                </div>
+              </motion.div>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
       {/* This is the final closing for the main app container div */}
     </div>
   );
