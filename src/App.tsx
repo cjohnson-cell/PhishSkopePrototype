@@ -1601,6 +1601,54 @@ const getRarityColor = (rarity: string) => {
 };
 
 // ==========================================
+// ENVIRONMENT / BACKGROUND DATABASE
+// ==========================================
+const BACKGROUNDS_DB: Record<string, any> = {
+  DEFAULT: {
+    id: "DEFAULT",
+    name: "Standard Issue",
+    rarity: "Common",
+    price: 0,
+    cssClass: "theme-default",
+  },
+  DARK_OPS: {
+    id: "DARK_OPS",
+    name: "Dark Ops",
+    rarity: "Common",
+    price: 0,
+    cssClass: "theme-dark",
+  },
+  BEACH: {
+    id: "BEACH",
+    name: "Beach Oasis",
+    rarity: "Rare",
+    price: 2000,
+    cssClass: "theme-beach",
+  },
+  HACKER: {
+    id: "HACKER",
+    name: "Terminal Grid",
+    rarity: "Epic",
+    price: 3000,
+    cssClass: "theme-hacker",
+  },
+  CYBERPUNK: {
+    id: "CYBERPUNK",
+    name: "Neon City",
+    rarity: "Legendary",
+    price: 4000,
+    cssClass: "theme-cyberpunk",
+  },
+  WAR_ROOM: {
+    id: "WAR_ROOM",
+    name: "IR War Room",
+    rarity: "Mythical",
+    price: 5000,
+    cssClass: "theme-war-room",
+  },
+};
+
+// ==========================================
 // 50-PLAYER MOCK LEADERBOARD GENERATOR
 // (To be replaced with Postgres API fetch)
 // ==========================================
@@ -1893,7 +1941,7 @@ export default function App() {
   const [spinKey, setSpinKey] = useState(0); // Forces roulette animation to reset
 
   // --- ECONOMY & ACHIEVEMENTS STATE ---
-  const [skopeCoins, setSkopeCoins] = useState(0);
+  const [skopeCoins, setSkopeCoins] = useState(9999999);
   const [showAchievements, setShowAchievements] = useState(false);
   const [unlockedAchievements, setUnlockedAchievements] = useState<string[]>(
     []
@@ -1901,6 +1949,14 @@ export default function App() {
   const [safeStreakCount, setSafeStreakCount] = useState(0);
   const [phishStreakCount, setPhishStreakCount] = useState(0);
   const [shopTab, setShopTab] = useState<"INVENTORY" | "SHOP">("INVENTORY");
+  const [shopCategory, setShopCategory] = useState<
+    "MAGNIFIERS" | "ENVIRONMENTS"
+  >("MAGNIFIERS");
+  const [unlockedBackgrounds, setUnlockedBackgrounds] = useState<string[]>([
+    "DEFAULT",
+    "DARK_OPS",
+  ]);
+  const [equippedBackground, setEquippedBackground] = useState("DEFAULT");
   const [achievementToasts, setAchievementToasts] = useState<any[]>([]);
   const [isDuplicate, setIsDuplicate] = useState(false);
   const [duplicateXpReward, setDuplicateXpReward] = useState(0);
@@ -2569,7 +2625,9 @@ export default function App() {
   const isSenderFound = foundIoCs.includes("ioc-sender");
 
   return (
-    <div className="app-container">
+    <div
+      className={`app-container ${BACKGROUNDS_DB[equippedBackground].cssClass}`}
+    >
       {/* 1. LEFT SIDEBAR */}
       <aside className="sidebar">
         <div
@@ -2796,21 +2854,6 @@ export default function App() {
             </button>
           )}
 
-          {/* 2. ACHIEVEMENTS BUTTON (Gold Theme) */}
-          <button
-            onClick={() => setShowAchievements(true)}
-            className="sidebar-btn-secondary"
-            style={{
-              margin: 0,
-              background: "rgba(251, 191, 36, 0.1)",
-              borderColor: "#fbbf24",
-              color: "#fbbf24",
-              boxShadow: "0 0 10px rgba(251, 191, 36, 0.15)",
-            }}
-          >
-            <Medal size={16} /> ACHIEVEMENTS
-          </button>
-
           {/* 3. ARMORY & SHOP BUTTON (Cyan Theme) */}
           <button
             onClick={() => {
@@ -2826,7 +2869,7 @@ export default function App() {
               boxShadow: "0 0 10px rgba(0, 169, 224, 0.15)",
             }}
           >
-            <ShoppingCart size={16} /> ARMORY & SHOP
+            <ShoppingCart size={16} /> SHOP/INVENTORY
           </button>
 
           {/* 4. GLOBAL LEADERBOARD BUTTON (Netskope Dark Slate Theme) */}
@@ -2843,7 +2886,22 @@ export default function App() {
             <Trophy size={16} /> Global Leaderboard
           </button>
 
-          {/* 4. INSTRUCTIONS BUTTON (Neutral Help Theme) */}
+          {/* 4. ACHIEVEMENTS BUTTON (Gold Theme) */}
+          <button
+            onClick={() => setShowAchievements(true)}
+            className="sidebar-btn-secondary"
+            style={{
+              margin: 0,
+              background: "rgba(251, 191, 36, 0.1)",
+              borderColor: "#fbbf24",
+              color: "#fbbf24",
+              boxShadow: "0 0 10px rgba(251, 191, 36, 0.15)",
+            }}
+          >
+            <Medal size={16} /> ACHIEVEMENTS
+          </button>
+
+          {/* 5. INSTRUCTIONS BUTTON (Neutral Help Theme) */}
           <button
             onClick={() => setShowInstructions(true)}
             className="sidebar-btn-secondary"
@@ -4015,7 +4073,47 @@ export default function App() {
                 </div>
               </div>
 
-              {shopTab === "SHOP" && (
+              {/* Category Toggle (Magnifiers vs Environments) */}
+              <div
+                style={{ display: "flex", gap: "10px", marginBottom: "20px" }}
+              >
+                <button
+                  onClick={() => setShopCategory("MAGNIFIERS")}
+                  style={{
+                    padding: "6px 16px",
+                    borderRadius: "20px",
+                    border: "1px solid #334155",
+                    background:
+                      shopCategory === "MAGNIFIERS" ? "#0ea5e9" : "transparent",
+                    color: shopCategory === "MAGNIFIERS" ? "#fff" : "#94a3b8",
+                    cursor: "pointer",
+                    fontWeight: 800,
+                    transition: "0.2s",
+                  }}
+                >
+                  Magnifiers
+                </button>
+                <button
+                  onClick={() => setShopCategory("ENVIRONMENTS")}
+                  style={{
+                    padding: "6px 16px",
+                    borderRadius: "20px",
+                    border: "1px solid #334155",
+                    background:
+                      shopCategory === "ENVIRONMENTS"
+                        ? "#0ea5e9"
+                        : "transparent",
+                    color: shopCategory === "ENVIRONMENTS" ? "#fff" : "#94a3b8",
+                    cursor: "pointer",
+                    fontWeight: 800,
+                    transition: "0.2s",
+                  }}
+                >
+                  Environments
+                </button>
+              </div>
+
+              {shopTab === "SHOP" && shopCategory === "MAGNIFIERS" && (
                 <div
                   style={{
                     background: "rgba(220, 38, 38, 0.1)",
@@ -4029,8 +4127,8 @@ export default function App() {
                     fontWeight: "bold",
                   }}
                 >
-                  NOTICE: Direct purchase is expensive. We highly advise
-                  inspectors to rely on CRATE openings for loadout upgrades.
+                  NOTICE: Direct purchase is expensive. We advise inspectors to
+                  rely on CRATE openings for magnifier upgrades.
                 </div>
               )}
 
@@ -4044,102 +4142,217 @@ export default function App() {
                   paddingRight: "5px",
                 }}
               >
-                {Object.values(MAGNIFIER_SKINS)
-                  .sort(
-                    (a, b) => getSkinPrice(a.rarity) - getSkinPrice(b.rarity)
-                  )
-                  .map((skin) => {
-                    const isOwned = inventory.includes(skin.id);
-                    const isEquipped = equippedSkin === skin.id;
-                    const price = getSkinPrice(skin.rarity);
+                {shopCategory === "MAGNIFIERS"
+                  ? // --- RENDER MAGNIFIERS ---
+                    Object.values(MAGNIFIER_SKINS)
+                      .sort(
+                        (a, b) =>
+                          getSkinPrice(a.rarity) - getSkinPrice(b.rarity)
+                      )
+                      .map((skin) => {
+                        const isOwned = inventory.includes(skin.id);
+                        const isEquipped = equippedSkin === skin.id;
+                        const price = getSkinPrice(skin.rarity);
 
-                    if (shopTab === "INVENTORY" && !isOwned) return null;
-                    if (shopTab === "SHOP" && isOwned) return null;
+                        if (shopTab === "INVENTORY" && !isOwned) return null;
+                        if (shopTab === "SHOP" && isOwned) return null;
 
-                    return (
-                      <div
-                        key={skin.id}
-                        style={{
-                          padding: "15px",
-                          background: "#0f172a",
-                          border: `2px solid ${
-                            isOwned ? skin.color : "#334155"
-                          }`,
-                          borderRadius: "8px",
-                        }}
-                      >
-                        <div
-                          style={{
-                            color: getRarityColor(skin.rarity),
-                            fontSize: "10px",
-                            fontWeight: 900,
-                            textTransform: "uppercase",
-                          }}
-                        >
-                          {skin.rarity}
-                        </div>
-                        <div
-                          style={{
-                            color: "#fff",
-                            fontWeight: 700,
-                            margin: "5px 0",
-                          }}
-                        >
-                          {skin.name}
-                        </div>
-
-                        {shopTab === "INVENTORY" ? (
-                          <button
-                            onClick={() => setEquippedSkin(skin.id)}
+                        return (
+                          <div
+                            key={skin.id}
                             style={{
-                              width: "100%",
-                              padding: "8px",
-                              marginTop: "10px",
-                              background: isEquipped
-                                ? skin.color
-                                : "transparent",
-                              color: isEquipped ? "#000" : skin.color,
-                              border: `1px solid ${skin.color}`,
-                              borderRadius: "4px",
-                              cursor: "pointer",
-                              fontWeight: "bold",
+                              padding: "15px",
+                              background: "#0f172a",
+                              border: `2px solid ${
+                                isOwned ? skin.color : "#334155"
+                              }`,
+                              borderRadius: "8px",
                             }}
                           >
-                            {isEquipped ? "EQUIPPED" : "EQUIP"}
-                          </button>
-                        ) : (
-                          <button
-                            onClick={() => {
-                              if (skopeCoins >= price) {
-                                setSkopeCoins((prev) => prev - price);
-                                setInventory((prev) => [...prev, skin.id]);
-                              }
-                            }}
-                            disabled={skopeCoins < price}
+                            <div
+                              style={{
+                                color: getRarityColor(skin.rarity),
+                                fontSize: "10px",
+                                fontWeight: 900,
+                                textTransform: "uppercase",
+                              }}
+                            >
+                              {skin.rarity}
+                            </div>
+                            <div
+                              style={{
+                                color: "#fff",
+                                fontWeight: 700,
+                                margin: "5px 0",
+                              }}
+                            >
+                              {skin.name}
+                            </div>
+
+                            {shopTab === "INVENTORY" ? (
+                              <button
+                                onClick={() => setEquippedSkin(skin.id)}
+                                style={{
+                                  width: "100%",
+                                  padding: "8px",
+                                  marginTop: "10px",
+                                  background: isEquipped
+                                    ? skin.color
+                                    : "transparent",
+                                  color: isEquipped ? "#000" : skin.color,
+                                  border: `1px solid ${skin.color}`,
+                                  borderRadius: "4px",
+                                  cursor: "pointer",
+                                  fontWeight: "bold",
+                                }}
+                              >
+                                {isEquipped ? "EQUIPPED" : "EQUIP"}
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => {
+                                  if (skopeCoins >= price) {
+                                    setSkopeCoins((prev) => prev - price);
+                                    setInventory((prev) => [...prev, skin.id]);
+                                  }
+                                }}
+                                disabled={skopeCoins < price}
+                                style={{
+                                  width: "100%",
+                                  padding: "8px",
+                                  marginTop: "10px",
+                                  background:
+                                    skopeCoins >= price ? "#10b981" : "#334155",
+                                  color:
+                                    skopeCoins >= price ? "#000" : "#94a3b8",
+                                  border: "none",
+                                  borderRadius: "4px",
+                                  cursor:
+                                    skopeCoins >= price
+                                      ? "pointer"
+                                      : "not-allowed",
+                                  fontWeight: "bold",
+                                  display: "flex",
+                                  justifyContent: "center",
+                                  alignItems: "center",
+                                  gap: "5px",
+                                }}
+                              >
+                                <Coins size={14} /> {price.toLocaleString()}
+                              </button>
+                            )}
+                          </div>
+                        );
+                      })
+                  : // --- RENDER ENVIRONMENTS ---
+                    Object.values(BACKGROUNDS_DB)
+                      .sort((a, b) => a.price - b.price)
+                      .map((bg) => {
+                        const isOwned = unlockedBackgrounds.includes(bg.id);
+                        const isEquipped = equippedBackground === bg.id;
+
+                        if (shopTab === "INVENTORY" && !isOwned) return null;
+                        if (shopTab === "SHOP" && isOwned) return null;
+
+                        return (
+                          <div
+                            key={bg.id}
                             style={{
-                              width: "100%",
-                              padding: "8px",
-                              marginTop: "10px",
-                              background:
-                                skopeCoins >= price ? "#10b981" : "#334155",
-                              color: skopeCoins >= price ? "#000" : "#94a3b8",
-                              border: "none",
-                              borderRadius: "4px",
-                              cursor:
-                                skopeCoins >= price ? "pointer" : "not-allowed",
-                              fontWeight: "bold",
-                              display: "flex",
-                              justifyContent: "center",
-                              alignItems: "center",
-                              gap: "5px",
+                              padding: "15px",
+                              background: "#0f172a",
+                              border: `2px solid ${
+                                isOwned ? "#10b981" : "#334155"
+                              }`,
+                              borderRadius: "8px",
                             }}
                           >
-                            <Coins size={14} /> {price.toLocaleString()}
-                          </button>
-                        )}
-                      </div>
-                    );
-                  })}
+                            <div
+                              style={{
+                                color: getRarityColor(bg.rarity),
+                                fontSize: "10px",
+                                fontWeight: 900,
+                                textTransform: "uppercase",
+                              }}
+                            >
+                              {bg.rarity}
+                            </div>
+                            <div
+                              style={{
+                                color: "#fff",
+                                fontWeight: 700,
+                                margin: "5px 0",
+                              }}
+                            >
+                              {bg.name}
+                            </div>
+
+                            {shopTab === "INVENTORY" ? (
+                              <button
+                                onClick={() => setEquippedBackground(bg.id)}
+                                style={{
+                                  width: "100%",
+                                  padding: "8px",
+                                  marginTop: "10px",
+                                  background: isEquipped
+                                    ? "#10b981"
+                                    : "transparent",
+                                  color: isEquipped ? "#000" : "#10b981",
+                                  border: "1px solid #10b981",
+                                  borderRadius: "4px",
+                                  cursor: "pointer",
+                                  fontWeight: "bold",
+                                }}
+                              >
+                                {isEquipped ? "ACTIVE" : "ACTIVATE"}
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => {
+                                  if (skopeCoins >= bg.price) {
+                                    setSkopeCoins((prev) => prev - bg.price);
+                                    setUnlockedBackgrounds((prev) => [
+                                      ...prev,
+                                      bg.id,
+                                    ]);
+                                  }
+                                }}
+                                disabled={skopeCoins < bg.price}
+                                style={{
+                                  width: "100%",
+                                  padding: "8px",
+                                  marginTop: "10px",
+                                  background:
+                                    skopeCoins >= bg.price
+                                      ? "#10b981"
+                                      : "#334155",
+                                  color:
+                                    skopeCoins >= bg.price ? "#000" : "#94a3b8",
+                                  border: "none",
+                                  borderRadius: "4px",
+                                  cursor:
+                                    skopeCoins >= bg.price
+                                      ? "pointer"
+                                      : "not-allowed",
+                                  fontWeight: "bold",
+                                  display: "flex",
+                                  justifyContent: "center",
+                                  alignItems: "center",
+                                  gap: "5px",
+                                }}
+                              >
+                                {bg.price === 0 ? (
+                                  "FREE UNLOCK"
+                                ) : (
+                                  <>
+                                    <Coins size={14} />{" "}
+                                    {bg.price.toLocaleString()}
+                                  </>
+                                )}
+                              </button>
+                            )}
+                          </div>
+                        );
+                      })}
               </div>
             </div>
           </motion.div>
@@ -4543,7 +4756,7 @@ export default function App() {
                 }}
               >
                 Follow these protocols to investigate threats and build your
-                armory.
+                Inventory.
               </p>
 
               <div
@@ -4734,7 +4947,7 @@ export default function App() {
                     purchase exclusive Magnifier Skins.{" "}
                     <em>
                       Tip: Earning XP to unlock free Decrypt Crates is the most
-                      efficient way to build your armory!
+                      efficient way to build out your inventory!
                     </em>
                   </p>
                 </div>
