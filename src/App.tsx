@@ -1897,10 +1897,10 @@ const ACHIEVEMENTS_DB = [
     type: "rank",
     target: 10000,
   },
-  // Classified Easter Egg
+  
   {
-    id: "ach_sec_benevac",
-    title: "The Benevac Protocol",
+    id: "ach_sec_X",
+    title: "The X Protocol",
     desc: "Acknowledge the Architect: Maintain 98% accuracy across 100 investigations.",
     reward: 20000,
     type: "secret",
