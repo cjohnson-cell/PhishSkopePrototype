@@ -3013,11 +3013,11 @@ export default function App() {
         <main className="main-view">
           <header className="header">
             <div
+              className="header-info-container"
               style={{
                 display: "flex",
                 alignItems: "center",
                 gap: "15px",
-                color: "#64748b",
                 fontSize: "0.875rem",
               }}
             >
@@ -3052,7 +3052,9 @@ export default function App() {
               <span>|</span>
               <div>
                 Simulation:{" "}
-                <strong style={{ color: "#0f172a" }}>{activeEmail.app}</strong>
+                <strong className="header-simulation-name">
+                  {activeEmail.app}
+                </strong>
               </div>
 
               {/* NEUTRAL EVIDENCE TRACKER (Shows for both Safe and Phish) */}
