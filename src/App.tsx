@@ -1959,7 +1959,7 @@ export default function App() {
   const [equippedBackground, setEquippedBackground] = useState("DEFAULT");
   const [achievementToasts, setAchievementToasts] = useState<any[]>([]);
   const [isDuplicate, setIsDuplicate] = useState(false);
-  const [duplicateXpReward, setDuplicateXpReward] = useState(0);
+  const [duplicateCoinReward, setDuplicateCoinReward] = useState(0);
 
   // NEW: Force the app to ALWAYS find a Tier 1 email on startup
   const initialEmail =
@@ -2299,21 +2299,21 @@ export default function App() {
     }
   }, [xp, rank, lastXpThreshold]);
 
-  // Helper to determine XP payout for duplicates
-  const getDuplicateXp = (rarity: string) => {
+  // Helper to determine Coin payout for duplicates
+  const getDuplicateCoins = (rarity: string) => {
     switch (rarity) {
       case "Common":
-        return 50;
+        return 25;
       case "Rare":
-        return 150;
+        return 75;
       case "Epic":
-        return 500;
+        return 200;
       case "Legendary":
-        return 1000;
+        return 750;
       case "Mythical":
         return 2500;
       default:
-        return 50;
+        return 25;
     }
   };
 
@@ -2349,7 +2349,7 @@ export default function App() {
 
     // 2. Check if the user already owns it right now
     const alreadyOwned = inventory.includes(winningItem.id);
-    const bonusXp = alreadyOwned ? getDuplicateXp(winningItem.rarity) : 0;
+    const bonusCoins = alreadyOwned ? getDuplicateCoins(winningItem.rarity) : 0;
 
     // 3. Build the visually diverse roulette track (no adjacent duplicates)
     const spinArray = [];
@@ -2378,14 +2378,14 @@ export default function App() {
 
     setRouletteItems(spinArray);
 
-    // Wait for the animation, then award the item/XP and update UI
+    // Wait for the animation, then award the item/coins and update UI
     setTimeout(() => {
       setWonSkin(winningItem);
       setIsDuplicate(alreadyOwned);
 
       if (alreadyOwned) {
-        setDuplicateXpReward(bonusXp);
-        setXp((prev) => prev + bonusXp); // This triggers your existing Rank Up / Milestone logic!
+        setDuplicateCoinReward(bonusCoins);
+        setSkopeCoins((prev) => prev + bonusCoins); // Award coins instead of XP
       } else {
         setInventory((prev) => [...prev, winningItem.id]);
       }
@@ -2655,14 +2655,14 @@ export default function App() {
               marginTop: "4px",
             }}
           >
-            <span style={{ color: "#ffffff" }}>SKOPE</span>
+            <span style={{ color: "#ffffff" }}>PHISH</span>
             <span
               style={{
                 color: "#00a9e0",
                 textShadow: "0 0 12px rgba(0, 169, 224, 0.5)",
               }}
             >
-              PHISH
+              SKOPE
             </span>
           </span>
         </div>
@@ -4621,14 +4621,19 @@ export default function App() {
                         </h2>
                         <div
                           style={{
-                            color: "#10b981",
+                            color: "#fbbf24", // Switched to Gold for coins
                             fontWeight: 900,
                             fontSize: "1.2rem",
                             marginTop: "8px",
-                            textShadow: "0 0 10px rgba(16, 185, 129, 0.4)",
+                            textShadow: "0 0 10px rgba(251, 191, 36, 0.4)",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            gap: "5px",
                           }}
                         >
-                          +{duplicateXpReward} XP DATA BOUNTY
+                          <Coins size={20} /> +{duplicateCoinReward} COIN
+                          SALVAGE
                         </div>
                       </>
                     ) : (
@@ -4971,7 +4976,7 @@ export default function App() {
                   flexShrink: 0,
                 }}
               >
-                Acknowledge & Begin
+                Acknowledge
               </button>
             </motion.div>
           </motion.div>
