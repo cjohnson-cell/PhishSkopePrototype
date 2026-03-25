@@ -643,3 +643,46 @@ html {
   box-shadow: 0 0 30px rgba(220, 38, 38, 0.2);
   color: #fecaca;
 }
+/* --- Base Header Text Colors --- */
+.header-info-container {
+  color: #64748b;
+}
+.header-simulation-name {
+  color: #0f172a;
+}
+
+/* --- Theme Overrides for Header Text --- */
+.theme-dark .header-info-container {
+  color: #94a3b8;
+}
+.theme-dark .header-simulation-name {
+  color: #f8fafc;
+}
+
+.theme-beach .header-info-container {
+  color: #78350f;
+}
+.theme-beach .header-simulation-name {
+  color: #451a03;
+}
+
+.theme-hacker .header-info-container {
+  color: #6ee7b7;
+}
+.theme-hacker .header-simulation-name {
+  color: #a7f3d0;
+}
+
+.theme-cyberpunk .header-info-container {
+  color: #a1a1aa;
+}
+.theme-cyberpunk .header-simulation-name {
+  color: #fdf4ff;
+}
+
+.theme-war-room .header-info-container {
+  color: #fca5a5;
+}
+.theme-war-room .header-simulation-name {
+  color: #fef2f2;
+}
