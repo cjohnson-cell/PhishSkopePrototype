@@ -2249,7 +2249,8 @@ export default function App() {
       : "100%";
 
   const dynamicLeaderboard = [
-    ...BASE_LEADERBOARD,
+    // explicitly cast isMe as false for the NPC data so the types match
+    ...BASE_LEADERBOARD.map(npc => ({ ...npc, isMe: false })),
     {
       id: "me",
       name: username || "Guest_Investigator",
@@ -3291,8 +3292,8 @@ export default function App() {
       {inspectorActive &&
         (() => {
           const skin = MAGNIFIER_SKINS[equippedSkin];
-          const isFinding =
-            hoveredIoC || foundIoCs.includes(hoveredIoC?.id || "");
+          // Force strict boolean evaluation to appease TypeScript
+          const isFinding = !!hoveredIoC;
           const lensSize = skin.lensSize || 240; // Dynamic lens size
           const offset = lensSize / 2;
 
