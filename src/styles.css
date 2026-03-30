@@ -228,7 +228,7 @@ html {
   font-size: 0.75rem;
   font-weight: 800;
   display: flex;
-  alignitems: center;
+  align-items: center;
   gap: 5px;
 }
 
