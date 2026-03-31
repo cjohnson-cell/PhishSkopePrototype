@@ -1922,8 +1922,12 @@ export default function App() {
   const [feedback, setFeedback] = useState<any>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
-  const [totalDecisions, setTotalDecisions] = useState(0);
+ const [totalDecisions, setTotalDecisions] = useState(0);
   const [correctDecisions, setCorrectDecisions] = useState(0);
+  
+  // NEW: Hidden TTR Tracking
+  const [emailStartTime, setEmailStartTime] = useState<number>(Date.now());
+  const [cumulativeTtrMs, setCumulativeTtrMs] = useState<number>(0);
 
   const [foundIoCs, setFoundIoCs] = useState<string[]>([]);
   const [hoveredIoC, setHoveredIoC] = useState<{
@@ -1975,7 +1979,9 @@ export default function App() {
     RUBY: 7000,
     APEX: 10000,
   };
-  const multiplier = streak >= 5 ? 3 : streak >= 3 ? 2 : 1;
+ // NEW: Gradual Multiplier (Scales by 0.25x per streak, capped at 3x)
+  // Streak 1 = 1.25x, Streak 4 = 2.0x, Streak 8+ = 3.0x
+  const multiplier = Math.min(1 + (streak * 0.25), 3);
 
   // NEW: Shared rank calculation for Player and Leaderboard
   const getRankFromXp = (v: number) => {
@@ -2286,8 +2292,8 @@ export default function App() {
       rankUpSound.play().catch((e) => console.log(e));
     }
 
-    // 2. 500 XP MILESTONE CHECK
-    const currentThreshold = Math.floor(xp / 500);
+    // 2. 400 XP MILESTONE CHECK
+    const currentThreshold = Math.floor(xp / 400);
     if (currentThreshold > lastXpThreshold) {
       const cratesEarned = currentThreshold - lastXpThreshold;
       setCrates((prev) => prev + cratesEarned);
@@ -2430,9 +2436,13 @@ export default function App() {
       (choice === "PHISH" && activeEmail.isPhish) ||
       (choice === "SAFE" && !activeEmail.isPhish);
 
-    // --- SYNCHRONOUS TRACKING FOR SECRET ACHIEVEMENTS ---
+    // --- SYNCHRONOUS TRACKING FOR SECRET ACHIEVEMENTS & TTR ---
     const newTotalDecisions = totalDecisions + 1;
     setTotalDecisions(newTotalDecisions);
+    
+    // Hidden TTR Calculation (Milliseconds)
+    const currentTtr = Date.now() - emailStartTime;
+    setCumulativeTtrMs(prev => prev + currentTtr);
 
     if (isCorrect) {
       const newCorrect = correctDecisions + 1;
@@ -2441,7 +2451,7 @@ export default function App() {
       // Calculate live accuracy right now for Netskope Protocol
       const currentAccuracy = (newCorrect / newTotalDecisions) * 100;
 
-      const xpGained = 100 * multiplier;
+      const xpGained = 150 * multiplier;
       const newXp = xp + xpGained;
       setXp(newXp);
 
@@ -2562,10 +2572,11 @@ export default function App() {
     const randomIndex = Math.floor(Math.random() * unseenEmails.length);
     const nextEmail = unseenEmails[randomIndex];
 
-    // 6. Update State
+   // 6. Update State
     if (nextEmail) {
       setActiveEmail(nextEmail);
       setSeenEmailIds((prev) => [...prev, nextEmail.id]);
+      setEmailStartTime(Date.now()); // Reset TTR clock for the new email
     }
   };
 
@@ -3455,15 +3466,17 @@ export default function App() {
                         background: "#000",
                         padding: "10px",
                         borderRadius: "4px",
-                        border: "1px solid #10b981",
-                        color: "#10b981",
+                        border: `1px solid ${rank === "RUBY" || rank === "APEX" ? "#ef4444" : "#10b981"}`,
+                        color: rank === "RUBY" || rank === "APEX" ? "#ef4444" : "#10b981",
                         fontSize: "11px",
                         fontFamily: "monospace",
                         lineHeight: "1.4",
                         fontWeight: 700,
                       }}
                     >
-                      {hoveredIoC.text}
+                      {rank === "RUBY" || rank === "APEX" 
+                        ? "[REDACTED: HARDCORE MODE] Examine the evidence. Trust your training."
+                        : hoveredIoC.text}
                     </div>
                   </div>
                 ) : (
